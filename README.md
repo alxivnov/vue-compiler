@@ -1,0 +1,2 @@
+# client-side-vue
+Script that enables usage of Vue.js Single File Components directly in browser. https://alxivnov.github.io/client-side-vue/
