@@ -15,7 +15,7 @@
 	>
 
 		<a
-			href="#"
+			:href="data.attrs && data.attrs.href ? data.attrs.href : '#'"
 			role="button"
 
 			v-bind="data.attrs"
