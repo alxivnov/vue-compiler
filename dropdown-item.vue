@@ -6,8 +6,8 @@
 		href="#"
 		:class="{
 			'dropdown-item': true,
-			'active': props.state == 'active',
-			'disabled': props.state == 'disabled',
+			'active': props.active !== undefined && props.active !== false,
+			'disabled': props.disabled !== undefined && props.disabled !== false,
 
 			['text-' + props.textStyle]: props.textStyle,
 		}"
@@ -29,7 +29,8 @@
 <script>
 export default {
 	props: [
-		'state',		// active|disabled
+		'active',
+		'disabled',
 
 		'fas',			// font awesome
 		'textStyle',	// primary|secondary|success|danger|warning|info|light|dark|body|muted|white|black-50|white-50
