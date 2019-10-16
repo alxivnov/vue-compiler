@@ -26,7 +26,7 @@
 			v-on="{
 				...listeners,
 				...(data.model
-					? { input: $event => listeners.input($event.target.value) }
+					? { input: $event => (Array.isArray(listeners.input) ? listeners.input : [ listeners.input ]).forEach(el => el($event.target.value)) }
 					: {})
 			}"
 			:id="data.attrs && data.attrs.id || data.model && data.model.expression"
