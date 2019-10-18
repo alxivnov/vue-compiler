@@ -10,7 +10,9 @@
 					? 'dropright'
 					: props.dropdownDirection == 'left'
 						? 'dropleft'
-						: 'dropdown'
+						: slots().dropdown
+							? 'dropdown'
+							: null
 		]"
 	>
 
@@ -37,7 +39,11 @@
 				'disabled': props.state == 'disabled' || data.attrs && data.attrs.disabled !== undefined && data.attrs.disabled !== false
 			}"
 
-			:data-toggle="slots().dropdown ? 'dropdown' : null" aria-haspopup="true" aria-expanded="false"
+			:data-toggle="slots().dropdown ? 'dropdown' : props.popoverTitle || props.popoverContent ? 'popover' : null" aria-haspopup="true" aria-expanded="false"
+			
+			:title="props.popoverTitle"
+			:data-content="props.popoverContent"
+			:data-placement="props.popoverPlacement"
 		>
 			<span
 				:v-show="props.fas"
@@ -84,6 +90,10 @@ export default {
 		'dropdownDirection',		// up|right|left
 		'dropdownAlignment',		// right|LEFT
 		'dropdownAlignmentSize',	// sm|md|lg|xl
+
+		'popoverTitle',
+		'popoverContent',
+		'popoverPlacement',			// TOP|right|bottom|left
 	]
 }
 </script>
