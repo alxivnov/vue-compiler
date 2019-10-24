@@ -5,7 +5,7 @@
 		
 		href="#"
 		:class="{
-			'dropdown-item': true,
+			['dropdown-' + (slots().default || props.fas ? 'item' : 'divider')]: true,
 			'active': props.active !== undefined && props.active !== false,
 			'disabled': props.disabled !== undefined && props.disabled !== false,
 
