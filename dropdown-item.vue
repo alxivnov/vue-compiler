@@ -2,12 +2,12 @@
 	<a
 		v-bind="data.attrs"
 		v-on="listeners"
-		
+
 		href="#"
 		:class="{
 			['dropdown-' + (slots().default || props.fas ? 'item' : 'divider')]: true,
-			'active': props.active !== undefined && props.active !== false,
-			'disabled': props.disabled !== undefined && props.disabled !== false,
+			'active': props.state == 'active' || data.attrs && data.attrs.active !== undefined && data.attrs.active !== false,
+			'disabled': props.state == 'disabled' || data.attrs && data.attrs.disabled !== undefined && data.attrs.disabled !== false,
 
 			['text-' + props.textStyle]: props.textStyle,
 		}"
@@ -29,8 +29,9 @@
 <script>
 export default {
 	props: [
-		'active',
-		'disabled',
+		'state',		// active|disabled
+//		active			// FALSE|true
+//		disabled		// FALSE|true
 
 		'fas',			// font awesome
 		'textStyle',	// primary|secondary|success|danger|warning|info|light|dark|body|muted|white|black-50|white-50

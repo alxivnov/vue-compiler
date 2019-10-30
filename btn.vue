@@ -22,7 +22,7 @@
 
 			v-bind="data.attrs"
 			v-on="listeners"
-			
+
 			:type="props.btnType == 'submit' ? 'submit' : null/*'button'*/"
 			:class="{
 				'btn': /**/props.btnStyle == 'link' ? false : /**/true,
@@ -32,15 +32,16 @@
 				'btn-sm': props.size == 'sm',
 				'btn-lg': props.size == 'lg',
 				'btn-block': props.block !== undefined && props.block !== false,
-				'active': props.state == 'active',
+
+				'active': props.state == 'active' || data.attrs && data.attrs.active !== undefined && data.attrs.active !== false,
+				'disabled': props.state == 'disabled' || data.attrs && data.attrs.disabled !== undefined && data.attrs.disabled !== false,
 
 				'dropdown-toggle': slots().dropdown/**/ && props.btnStyle != 'link'/**/,
-				'dropdown-toggle-split': slots().dropdown && !props.fas && !slots().default,
-				'disabled': props.state == 'disabled' || data.attrs && data.attrs.disabled !== undefined && data.attrs.disabled !== false
+				'dropdown-toggle-split': slots().dropdown && !props.fas && !slots().default
 			}"
 
 			:data-toggle="slots().dropdown ? 'dropdown' : props.popoverTitle || props.popoverContent ? 'popover' : null" aria-haspopup="true" aria-expanded="false"
-			
+
 			:title="props.popoverTitle"
 			:data-content="props.popoverContent"
 			:data-placement="props.popoverPlacement"
@@ -84,6 +85,8 @@ export default {
 		'size',						// sm|lg
 		'block',					// true|FALSE
 		'state',					// active|disabled
+//		active						// FALSE|true
+//		disabled					// FALSE|true
 
 		'fas',						// font awesome
 

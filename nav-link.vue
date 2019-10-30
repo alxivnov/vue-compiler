@@ -3,8 +3,8 @@
 		:class="{
 			'nav-item': true,
 			'nav-link': true,
-			'active': props.active !== undefined && props.active !== false,
-			'disabled': props.disabled !== undefined && props.disabled !== false,
+			'active': props.state == 'active' || data.attrs && data.attrs.active !== undefined && data.attrs.active !== false,
+			'disabled': props.state == 'disabled' || data.attrs && data.attrs.disabled !== undefined && data.attrs.disabled !== false,
 		}"
 		:href="props.href || '#'"
 	>
@@ -16,8 +16,9 @@
 export default {
 	props: [
 		'href',
-		'active',			// FALSE|true
-		'disabled',			// FALSE|true
+		'state',					// active|disabled
+//		active						// FALSE|true
+//		disabled					// FALSE|true
 	]
 }
 </script>

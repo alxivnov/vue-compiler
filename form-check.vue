@@ -5,10 +5,10 @@
 */
 		'custom-control',
 		props.type == 'radio'
-			? 'custom-control-radio'
+			? 'custom-radio'
 			: props.switch
 				? 'custom-switch'
-				: 'custom-control-checkbox',
+				: 'custom-checkbox',
 		props.inline ? 'custom-control-inline' : null,
 
 		props.col ? 'col-' + props.col : 'col'
@@ -22,9 +22,9 @@
 					? { input: $event => (Array.isArray(listeners.input) ? listeners.input : [ listeners.input ]).forEach(el => el($event.target.checked)) }
 					: {})
 			}"
-			:id="data.attrs && data.attrs.id || data.model && data.model.expression"
-			:name="data.attrs && data.attrs.name || data.model && data.model.expression"
-			:checked="data.attrs.value"
+			:id="data.attrs && (data.attrs.id || data.attrs.name) || data.model && data.model.expression"
+			:name="data.attrs && (data.attrs.name || data.attrs.id) || data.model && data.model.expression"
+			:checked="data.attrs && data.attrs.value"
 			
 			:class="{
 //				'form-check-input': true,
