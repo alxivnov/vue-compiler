@@ -1,7 +1,7 @@
 function vue_import_components(components) {
 	if (typeof (components) == 'string')
 		components = [components];
-	
+
 	if (Array.isArray)
 		components = components.reduce(function (prev, curr) {
 			let name = curr
@@ -16,18 +16,20 @@ function vue_import_components(components) {
 			prev[name] = curr;
 			return prev;
 		}, {});
-	
+
 	Object.keys(components).forEach(function (name) {
 		Vue.component(name, function (resolve, reject) {
 			fetch(components[name])
 				.then(res => res.text())
 				.then(text => {
-					let template = /<template([^>]*)>[\s]*(.*)<\/template>/gs.exec(text);
-					let script = /<script[^>]*>[^}]*export[\s]*default[\s]*{[\s]*(.*)}[\s]*<\/script>/gs.exec(text);
-			
+					var template = '<template([^>]*)>[\s]*(.*)<\/template>';
+					var script = '<script[^>]*>[^}]*export[\s]*default[\s]*{[\s]*(.*)}[\s]*<\/script>';
+					template = new RegExp(template.replace('.', '[\\s\\S]'), 'g').exec(text);
+					script = new RegExp(script.replace('.', '[\\s\\S]'), 'g').exec(text);
+
 					if (!template || template.length < 3)
 						return;
-					
+
 					let temp = script && script.length > 1 ? eval('({' + script[1] + '})') : {};
 					if (template && template.length > 2) {
 						temp.template = template[2];
