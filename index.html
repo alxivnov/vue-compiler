@@ -4,14 +4,14 @@
 	<meta charset="UTF-8">
 	<meta name="viewport" content="width=device-width, initial-scale=1.0">
 	<meta http-equiv="X-UA-Compatible" content="ie=edge">
-	<title>Client-Side Vue</title>
+	<title>Vue SFC Compiler</title>
 
 	<link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
 
 	<link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.8.2/css/all.css" integrity="sha384-oS3vJWv+0UjzBfQzYUhtDYW+Pj2yciDJxpsK1OYPAYjqT085Qq/1cq5FLXAZQ7Ay" crossorigin="anonymous">
 </head>
 <body>
-	<h1 class="mt-5 text-center">Client-Side Vue SFCs</h1>
+	<h1 class="mt-5 text-center">Client-Side Vue SFC Compiler</h1>
 	<p class="mt-5 mx-5">
 		Script that enables usage of Vue.js Single File Components directly in browser.
 	</p>
@@ -21,10 +21,10 @@
 				'font-weight-bold': font == 1,
 				'font-italic': font == 2
 			}">
-				&lt;script src="./client-side-vue.js">&lt;/script>
+				&lt;script src="./vue-compiler.js">&lt;/script>
 
 				&lt;script>
-					vue_import_components([
+					VueCompiler.import([
 						'./btn.vue', './dropdown-divider.vue', './dropdown-header.vue', './dropdown-item.vue',
 					]);
 				&lt;/script>
@@ -62,22 +62,22 @@
 
 	<script src="https://cdn.jsdelivr.net/npm/vue"></script>
 
-	<script src="./client-side-vue.js"></script>
+	<script src="./vue-compiler.js"></script>
 
 	<script>
-		vue_import_components([
-			'./btn-group.vue',
-			'./btn.vue',
-			'./dropdown-divider.vue',
-			'./dropdown-header.vue',
-			'./dropdown-item-text.vue',
-			'./dropdown-item.vue',
-			'./fa.vue',
-			'./form-check.vue',
-			'./form-input.vue',
-			'./form-row.vue',
-			'./form-select.vue',
-			'./form-textarea.vue'
+		VueCompiler.import([
+			'btn-group.vue',
+			'btn.vue',
+			'dropdown-divider.vue',
+			'dropdown-header.vue',
+			'dropdown-item-text.vue',
+			'dropdown-item.vue',
+			'fa.vue',
+			'form-check.vue',
+			'form-input.vue',
+			'form-row.vue',
+			'form-select.vue',
+			'form-textarea.vue'
 		]);
 
 		var app = new Vue({
