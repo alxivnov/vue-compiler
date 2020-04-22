@@ -33,7 +33,7 @@ let VueCompiler = (function () {
 			template: regexp('<template([^>]*)>(.*)<\/template>', 'gs'),
 			script: regexp('<script[^>]*>(.*?)(?:export\\s+default|module.exports\\s+=)\\s+{(.*)}.*?<\/script>', 'gs'),
 			export: regexp('(.*?)(?:export\\s+default|module.exports\\s+=)\\s+{(.*)}', 'gms'),
-			import: regexp('(?:^|\\r\\n)\\s*import(?:\\s+([^\'"`].*?)\\s+from\\s+|\\s+)(?:\'|"|`)(.*?)(?:\'|"|`)', 'gms')
+			import: regexp('(?:^|\\r\\n)\\s*import(?:\\s+([^\'"`].*?)\\s+from\\s+|\\s+)(?:\'|"|`)(.*?)(?:\'|"|`);?', 'gms')
 		},
 
 		import: function (components, mixins) {
@@ -87,8 +87,11 @@ let VueCompiler = (function () {
 
 						let imps = hasScript ? VueCompiler.regexp.import.findAll(script[1], true) : [];
 						imps.push(null);
+						let js = hasScript
+							? script[1].replace(VueCompiler.regexp.import, '')
+							: null;
 						//
-//						console.log('imps', imps);
+//						console.log('imps', imps, js);
 						return imps.reduce(function (promise, imp) {
 							return promise.then(function (context) {
 								return imp == null
@@ -150,7 +153,7 @@ let VueCompiler = (function () {
 										})
 										: Promise.resolve(context);
 							});
-						}, Promise.resolve({ js: hasScript ? '' : null, defs: [] }));
+						}, Promise.resolve({ js: js, defs: [] }));
 					});
 				});
 		},
