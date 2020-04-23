@@ -3,6 +3,8 @@
 </template>
 
 <script>
+// https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.9.3/Chart.min.js
+// https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.9.3/Chart.min.css
 export default {
 	props: [
 		'type',
