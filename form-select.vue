@@ -16,13 +16,13 @@
 				: null
 		]" :for="data.attrs && data.attrs.id || data.model && data.model.expression" v-show="slots().default">
 			<slot></slot>
-			
+
 			<span v-show="data.attrs && data.attrs.required !== undefined" class="text-danger">*</span>
 		</label>
 
 		<select
 			v-bind="data.attrs"
-			
+
 			v-on="{
 				...listeners,
 				...(data.model
@@ -42,7 +42,7 @@
 				props.row !== undefined
 					? 'col'
 					: null,
-				
+
 				data.attrs && data.attrs['is-invalid']
 					? 'is-invalid'
 					: null

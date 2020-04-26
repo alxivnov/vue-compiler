@@ -1,5 +1,7 @@
 <template>
-	<canvas ref="canvas" width="100%" height="100%"></canvas>
+	<div>
+		<canvas ref="canvas" width="100%" height="100%"></canvas>
+	</div>
 </template>
 
 <script>
