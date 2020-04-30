@@ -2,18 +2,26 @@
 	<transition appear @appear="
 		$('#' + (data.attrs.id || 'modal'))
 			.on('show.bs.modal', function (e) {
+//				console.log('show.bs.modal');
+
 				if (listeners.show)
 					listeners.show(e);
 			})
 			.on('shown.bs.modal', function (e) {
+//				console.log('shown.bs.modal');
+
 				if (listeners.shown)
 					listeners.shown(e);
 			})
 			.on('hide.bs.modal', function (e) {
+//				console.log('hide.bs.modal');
+
 				if (listeners.hide)
 					listeners.hide(e);
 			})
 			.on('hidden.bs.modal', function (e) {
+//				console.log('hidden.bs.modal');
+
 				if (listeners.hidden)
 					listeners.hidden(e);
 			})
@@ -55,7 +63,7 @@
 					<div class="modal-body">
 						<slot></slot>
 					</div>
-					<div class="modal-footer">
+					<div v-show="slots().footer" class="modal-footer">
 						<slot name="footer"></slot>
 					</div>
 				</div>

@@ -44,11 +44,18 @@ export default {
 			this.chart = new Chart(this.$refs.canvas, {
 				type: type,
 				data: data,
-				options: { ...options, onClick: this.onClick }
+				options: {
+					...options,
+					onClick: this.onClick,
+					onHover: this.onHover
+				}
 			});
 		},
 		onClick(event) {
 			this.$emit('click', event, this.chart);
+		},
+		onHover(event) {
+			this.$emit('hover', event, this.chart);
 		}
 	}
 }
