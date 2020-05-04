@@ -95,12 +95,14 @@ let VueCompiler = (function () {
 						imps.push(null);
 						let ctx = hasScript
 							? {
-								js: script[1].replace(VueCompiler.regexp.import, '').replace(VueCompiler.regexp.absolute, 'VueCompiler.download(new URL($1, "' + absoluteURL + '").href, mixins)'),
+								init: script[1].replace(VueCompiler.regexp.import, '').replace(VueCompiler.regexp.absolute, 'VueCompiler.download(new URL($1, "' + absoluteURL + '").href, mixins)'),
 								main: script[2].replace(VueCompiler.regexp.absolute, 'VueCompiler.download(new URL($1, "' + absoluteURL + '").href, mixins)'),
-								defs: []
+								defs: [],
+								js: ''
 							}
 							: {
-								defs: []
+								defs: [],
+								js: ''
 							};
 						//
 //						console.log('imps', imps, js);
@@ -108,7 +110,7 @@ let VueCompiler = (function () {
 							return promise.then(function (context) {
 								return imp == null
 									? new Promise(function (resolve, reject) {
-										let js = context.js != null ? context.js + '({' + context.main + '})' : '({})';
+										let js = context.js != null ? context.js + context.init + '({' + context.main + '})' : '({})';
 										//
 //										console.log(/*'js', url,*/ js/*, script*/);
 										try {
