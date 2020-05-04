@@ -96,7 +96,9 @@ let VueCompiler = (function () {
 						let js = hasScript
 							? script[1].replace(VueCompiler.regexp.import, '').replace(VueCompiler.regexp.absolute, 'VueCompiler.download(new URL($1, "' + absoluteURL + '").href, mixins)')
 							: null;
-						let main = script[2].replace(VueCompiler.regexp.absolute, 'VueCompiler.download(new URL($1, "' + absoluteURL + '").href, mixins)');
+						let main = hasScript
+							? script[2].replace(VueCompiler.regexp.absolute, 'VueCompiler.download(new URL($1, "' + absoluteURL + '").href, mixins)')
+							: null;
 						//
 //						console.log('imps', imps, js);
 						return imps.reduce(function (promise, imp) {
