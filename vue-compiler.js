@@ -93,12 +93,15 @@ let VueCompiler = (function () {
 
 						let imps = hasScript ? VueCompiler.regexp.import.findAll(script[1], true) : [];
 						imps.push(null);
-						let js = hasScript
-							? script[1].replace(VueCompiler.regexp.import, '').replace(VueCompiler.regexp.absolute, 'VueCompiler.download(new URL($1, "' + absoluteURL + '").href, mixins)')
-							: null;
-						let main = hasScript
-							? script[2].replace(VueCompiler.regexp.absolute, 'VueCompiler.download(new URL($1, "' + absoluteURL + '").href, mixins)')
-							: null;
+						let ctx = hasScript
+							? {
+								js: script[1].replace(VueCompiler.regexp.import, '').replace(VueCompiler.regexp.absolute, 'VueCompiler.download(new URL($1, "' + absoluteURL + '").href, mixins)'),
+								main: script[2].replace(VueCompiler.regexp.absolute, 'VueCompiler.download(new URL($1, "' + absoluteURL + '").href, mixins)'),
+								defs: []
+							}
+							: {
+								defs: []
+							};
 						//
 //						console.log('imps', imps, js);
 						return imps.reduce(function (promise, imp) {
@@ -162,7 +165,7 @@ let VueCompiler = (function () {
 										})
 										: Promise.resolve(context);
 							});
-						}, Promise.resolve({ js: js, defs: [], main: main }));
+						}, Promise.resolve(ctx));
 					});
 				});
 		},
