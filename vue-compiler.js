@@ -29,11 +29,14 @@ let VueCompiler = (function () {
 
 	return {
 		regexp: {
+			name: regexp('[^\\d\\w-]', 'g'),
+			slot: regexp('_t\\("(.*?)"\\)', 'g'),
 			src: regexp('<(template|script)[ ]*src=(?:\'|"|`)([^\'"`]*)(?:\'|"|`).*>', 'gs'),
 			template: regexp('<template([^>]*)>(.*)<\/template>', 'gs'),
 			script: regexp('<script[^>]*>(.*?)(?:export\\s+default|module.exports\\s+=)\\s+{(.*)}.*?<\/script>', 'gs'),
 			export: regexp('(.*?)(?:export\\s+default|module.exports\\s+=)\\s+{(.*)}', 'gms'),
-			import: regexp('(?:^|\\r\\n)\\s*import(?:\\s+([^\'"`].*?)\\s+from\\s+|\\s+)(?:\'|"|`)(.*?)(?:\'|"|`);?', 'gms')
+			import: regexp('(?:^|\\r\\n)\\s*import(?:\\s+([^\'"`].*?)\\s+from\\s+|\\s+)(?:\'|"|`)(.*?)(?:\'|"|`);?', 'gms'),
+			absolute: regexp('\\bimport\\(([^())]+)\\)', 'g')
 		},
 
 		import: function (components, mixins) {
@@ -48,7 +51,7 @@ let VueCompiler = (function () {
 						.split('.')
 						.slice(0, -1)
 						.map(function (el) {
-							return el.replace(/[^\d\w-]/, '-');
+							return el.replace(VueCompiler.regexp.name, '-');
 						})
 						.join('-');
 					prev[name] = curr;
@@ -60,7 +63,8 @@ let VueCompiler = (function () {
 					VueCompiler.download(components[name], mixins)
 						.then(function (def) {
 							resolve(def);
-						}).catch(function (err) {
+						})
+						.catch(function (err) {
 							reject(err);
 						});
 				});
@@ -85,20 +89,23 @@ let VueCompiler = (function () {
 						if (!hasTemplate && !hasScript)
 							return { template: '<span>' + text + '</span>' };//text;
 
+						let absoluteURL = new URL(url, document.baseURI).href;
+
 						let imps = hasScript ? VueCompiler.regexp.import.findAll(script[1], true) : [];
 						imps.push(null);
 						let js = hasScript
-							? script[1].replace(VueCompiler.regexp.import, '')
+							? script[1].replace(VueCompiler.regexp.import, '').replace(VueCompiler.regexp.absolute, 'VueCompiler.download(new URL($1, "' + absoluteURL + '").href, mixins)')
 							: null;
+						let main = script[2].replace(VueCompiler.regexp.absolute, 'VueCompiler.download(new URL($1, "' + absoluteURL + '").href, mixins)');
 						//
 //						console.log('imps', imps, js);
 						return imps.reduce(function (promise, imp) {
 							return promise.then(function (context) {
 								return imp == null
 									? new Promise(function (resolve, reject) {
+										let js = context.js != null ? context.js + '({' + context.main + '})' : '({})';
 										//
-//										console.log('js', url, js, script);
-										let js = context.js != null ? context.js + '({' + script[2] + '})' : '({})';
+//										console.log(/*'js', url,*/ js/*, script*/);
 										try {
 											let temp = eval(js);
 											if (hasTemplate) {
@@ -110,7 +117,7 @@ let VueCompiler = (function () {
 													let fn = res.render.toString()
 														.replace('anonymous(', '(_h, _vm')
 														.replace('with(this)', 'with(_vm)')
-														.replace(/_t\("(.*?)"\)/g, 'slots().$1');
+														.replace(VueCompiler.regexp.slot, 'slots().$1');
 													temp.render = eval('(' + fn + ')');
 													temp.staticRenderFns = res.staticRenderFns;
 													delete temp.template;
@@ -153,7 +160,7 @@ let VueCompiler = (function () {
 										})
 										: Promise.resolve(context);
 							});
-						}, Promise.resolve({ js: js, defs: [] }));
+						}, Promise.resolve({ js: js, defs: [], main: main }));
 					});
 				});
 		},
