@@ -79,13 +79,13 @@ let VueCompiler = (function () {
 
 		download: function (url, mixins) {
 			return fetch(url)
-				.then(function (res) { return res.text() })
+				.then(function (res) { return res.ok ? res.text() : null })
 				.then(function (text) {
 					return VueCompiler.assemble(text).then(function (text) {
 						var template = VueCompiler.regexp.template.find(text, true);
 						var script = VueCompiler.regexp.script.find(text, true);
 						//
-//						console.log('vue_component_definition', url, script);
+//						console.log('vue_component_definition', url, template, script);
 						if (!template && !script)
 							script = VueCompiler.regexp.export.find(text, true);
 
@@ -116,9 +116,9 @@ let VueCompiler = (function () {
 							return promise.then(function (context) {
 								return imp == null
 									? new Promise(function (resolve, reject) {
-										let js = context.js != null ? context.js + context.init + '({' + context.main + '})' : '({})';
+										let js = context.main ? context.js + context.init + '({' + context.main + '})' : '({})';
 										//
-//										console.log(/*'js', url,*/ js/*, script*/);
+//										console.log(/*'js', url,*/ js/*, script*/, context);
 										try {
 											let temp = eval(js);
 											if (hasTemplate) {
@@ -184,7 +184,7 @@ let VueCompiler = (function () {
 			return srcs.reduce(function (promise, src) {
 				return promise.then(function (text) {
 					return fetch(src[2])
-						.then(function (res) { return res.text(); })
+						.then(function (res) { return res.ok ? res.text() : null; })
 						.then(function (cont) {
 							return text.replace(src[0], '<' + src[1] + '>\r\n' + cont + '\r\n</' + src[1] + '>');
 						});
