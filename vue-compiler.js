@@ -71,6 +71,12 @@ let VueCompiler = (function () {
 			});
 		},
 
+		absolute: function (url, base) {
+			let abs = new URL(url, base);
+//			console.log('URL', url, base, abs.href);
+			return abs.href;
+		},
+
 		download: function (url, mixins) {
 			return fetch(url)
 				.then(function (res) { return res.text() })
@@ -89,14 +95,14 @@ let VueCompiler = (function () {
 						if (!hasTemplate && !hasScript)
 							return { template: '<span>' + text + '</span>' };//text;
 
-						let absoluteURL = new URL(url, document.baseURI).href;
+						let absoluteURL = VueCompiler.absolute(url, document.baseURI);
 
 						let imps = hasScript ? VueCompiler.regexp.import.findAll(script[1], true) : [];
 						imps.push(null);
 						let ctx = hasScript
 							? {
-								init: script[1].replace(VueCompiler.regexp.import, '').replace(VueCompiler.regexp.absolute, 'VueCompiler.download(new URL($1, "' + absoluteURL + '").href, mixins)'),
-								main: script[2].replace(VueCompiler.regexp.absolute, 'VueCompiler.download(new URL($1, "' + absoluteURL + '").href, mixins)'),
+								init: script[1].replace(VueCompiler.regexp.import, '').replace(VueCompiler.regexp.absolute, 'VueCompiler.download(VueCompiler.absolute($1, "' + absoluteURL + '"), mixins)'),
+								main: script[2].replace(VueCompiler.regexp.absolute, 'VueCompiler.download(VueCompiler.absolute($1, "' + absoluteURL + '"), mixins)'),
 								defs: [],
 								js: ''
 							}
@@ -143,7 +149,7 @@ let VueCompiler = (function () {
 										}
 									})
 									: imp.length > 2
-										? VueCompiler.download(imp[2], mixins).then(function (def) {
+										? VueCompiler.download(VueCompiler.absolute(imp[2], absoluteURL), mixins).then(function (def) {
 											if (def instanceof Object) {
 												context.defs[imp[2]] = def;
 												let name = imp[1] || imp[2]
