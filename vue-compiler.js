@@ -93,7 +93,7 @@ let VueCompiler = (function () {
 						let hasScript = !!script && script.length > 2;
 
 						if (!hasTemplate && !hasScript)
-							return { template: '<span>' + text + '</span>' };//text;
+							return text ? { template: '<span>' + text + '</span>' } : text;//text;
 
 						let absoluteURL = VueCompiler.absolute(url, document.baseURI);
 
@@ -150,7 +150,7 @@ let VueCompiler = (function () {
 									})
 									: imp.length > 2
 										? VueCompiler.download(VueCompiler.absolute(imp[2], absoluteURL), mixins).then(function (def) {
-											if (def instanceof Object) {
+											if (def instanceof Object || def == null) {
 												context.defs[imp[2]] = def;
 												let name = imp[1] || imp[2]
 													.split('/')
@@ -186,7 +186,7 @@ let VueCompiler = (function () {
 					return fetch(src[2])
 						.then(function (res) { return res.ok ? res.text() : null; })
 						.then(function (cont) {
-							return text.replace(src[0], '<' + src[1] + '>\r\n' + cont + '\r\n</' + src[1] + '>');
+							return text.replace(src[0], '<' + src[1] + '>\r\n' + (cont || '') + '\r\n</' + src[1] + '>');
 						});
 				});
 			}, Promise.resolve(text));
