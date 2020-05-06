@@ -77,6 +77,16 @@ let VueCompiler = (function () {
 			return abs.href;
 		},
 
+		sequence: function (arr, context) {
+			return arr.reduce(function (prev, curr) {
+				return prev.then(function (ctx) {
+					return typeof (curr) == 'function'
+						? curr(ctx)
+						: curr;
+				});
+			}, Promise.resolve(context));
+		},
+
 		download: function (url, mixins) {
 			return fetch(url)
 				.then(function (res) { return res.ok ? res.text() : null })
@@ -93,87 +103,87 @@ let VueCompiler = (function () {
 						let hasScript = !!script && script.length > 2;
 
 						if (!hasTemplate && !hasScript)
-							return text ? { template: '<span>' + text + '</span>' } : text;//text;
+							return text ? { template: '<span>' + text + '</span>' } : null;//text;
 
 						let absoluteURL = VueCompiler.absolute(url, document.baseURI);
 
 						let imps = hasScript ? VueCompiler.regexp.import.findAll(script[1], true) : [];
-						imps.push(null);
 						let ctx = hasScript
 							? {
-								init: script[1].replace(VueCompiler.regexp.import, '').replace(VueCompiler.regexp.absolute, 'VueCompiler.download(VueCompiler.absolute($1, "' + absoluteURL + '"), mixins)'),
+								init: script[1].replace(VueCompiler.regexp.absolute, 'VueCompiler.download(VueCompiler.absolute($1, "' + absoluteURL + '"), mixins)'),
 								main: script[2].replace(VueCompiler.regexp.absolute, 'VueCompiler.download(VueCompiler.absolute($1, "' + absoluteURL + '"), mixins)'),
-								defs: [],
-								js: ''
+								defs: {}
 							}
 							: {
-								defs: [],
-								js: ''
+								defs: {}
 							};
 						//
-//						console.log('imps', imps, js);
-						return imps.reduce(function (promise, imp) {
-							return promise.then(function (context) {
-								return imp == null
-									? new Promise(function (resolve, reject) {
-										let js = context.main ? context.js + context.init + '({' + context.main + '})' : '({})';
-										//
-//										console.log(/*'js', url,*/ js/*, script*/, context);
-										try {
-											let temp = eval(js);
-											if (hasTemplate) {
-												temp.template = template[2];
-												temp.functional = template[1].includes('functional');
+//						console.log('imps', imps);
+						let last = function (context) {
+							return new Promise(function (resolve, reject) {
+								let js = context.main ? context.init + '({' + context.main + '})' : '({})';
+								//
+//								console.log(/*'js', url,*/ js/*, script*/, context);
+								try {
+									let temp = eval(js + '//# sourceURL=VueCompiler.js');
+									if (hasTemplate) {
+										temp.template = template[2];
+										temp.functional = template[1].includes('functional');
 
-												if (temp.functional) {
-													let res = Vue.compile(temp.template);
-													let fn = res.render.toString()
-														.replace('anonymous(', '(_h, _vm')
-														.replace('with(this)', 'with(_vm)')
-														.replace(VueCompiler.regexp.slot, 'slots().$1');
-													temp.render = eval('(' + fn + ')');
-													temp.staticRenderFns = res.staticRenderFns;
-													delete temp.template;
-												}
-
-												temp.mixins = mixins;
-											}
-
-											resolve(temp);
-										} catch (err) {
-											err.js = js;
-
-											console.log('eval', err, err.lineNumber, js);
-
-											reject(err);
+										if (temp.functional) {
+											let res = Vue.compile(temp.template);
+											let fn = res.render.toString()
+												.replace('anonymous(', '(_h, _vm')
+												.replace('with(this)', 'with(_vm)')
+												.replace(VueCompiler.regexp.slot, 'slots().$1');
+											temp.render = eval('(' + fn + ')');
+											temp.staticRenderFns = res.staticRenderFns;
+											delete temp.template;
 										}
-									})
-									: imp.length > 2
-										? VueCompiler.download(VueCompiler.absolute(imp[2], absoluteURL), mixins).then(function (def) {
-											if (def instanceof Object || def == null) {
-												context.defs[imp[2]] = def;
-												let name = imp[1] || imp[2]
-													.split('/')
-													.slice(-1)[0]
-													.split('.')
-													.slice(0, -1)[0]
-													.split('-')
-													.map(function (s, i) {
-														return /*i > 0 ?*/ s.slice(0, 1).toUpperCase() + s.slice(1) /*: s*/;
-													})
-													.join('');
-												//
-//												console.log('def', imp, name);
-												context.js += 'let ' + name + ' = context.defs[\'' + imp[2] + '\'];\r\n';
-											} else {
-												context.js += def + '\r\n';
-											}
 
-											return context;
-										})
-										: Promise.resolve(context);
+										temp.mixins = mixins;
+									}
+
+									resolve(temp);
+								} catch (err) {
+									err.js = js;
+
+									console.log('eval', err, err.lineNumber, js);
+
+									reject(err);
+								}
 							});
-						}, Promise.resolve(ctx));
+						};
+						let promises = imps.filter(function (imp) {
+							return imp.length > 2;
+						}).map(function (imp) {
+							return function (context) {
+								return VueCompiler.download(VueCompiler.absolute(imp[2], absoluteURL), mixins).then(function (def) {
+									if (def instanceof Object || def == null) {
+										context.defs[imp[2]] = def;
+										let name = imp[1] || imp[2]
+											.split('/')
+											.slice(-1)[0]
+											.split('.')
+											.slice(0, -1)[0]
+											.split('-')
+											.map(function (s, i) {
+												return /*i > 0 ?*/ s.slice(0, 1).toUpperCase() + s.slice(1) /*: s*/;
+											})
+											.join('');
+										//
+//										console.log('def', imp, name);
+										def = 'let ' + name + ' = context.defs[\'' + imp[2] + '\'];';
+									}
+
+									context.init = context.init.replace(imp[0], def);
+
+									return context;
+								});
+							};
+						});
+						promises.push(last);
+						return VueCompiler.sequence(promises, ctx);
 					});
 				});
 		},
