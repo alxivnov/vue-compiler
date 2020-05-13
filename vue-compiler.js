@@ -35,7 +35,7 @@ let VueCompiler = (function () {
 			template: regexp('<template([^>]*)>(.*)<\/template>', 'gs'),
 			script: regexp('<script[^>]*>(.*?)(?:export\\s+default|module.exports\\s+=)\\s+{(.*)}.*?<\/script>', 'gs'),
 			export: regexp('(.*?)(?:export\\s+default|module.exports\\s+=)\\s+{(.*)}', 'gms'),
-			import: regexp('(?:^|\\r\\n)\\s*import(?:\\s+([^\'"`].*?)\\s+from\\s+|\\s+)(?:\'|"|`)(.*?)(?:\'|"|`);?', 'gms'),
+			import: regexp('(?:^)\\s*import(?:\\s+([^\'"`].*?)\\s+from\\s+|\\s+)(?:\'|"|`)(.*?)(?:\'|"|`);?', 'gms'),//|\\r\\n
 			absolute: regexp('\\bimport\\(([^())]+)\\)', 'g')
 		},
 
@@ -125,7 +125,7 @@ let VueCompiler = (function () {
 								//
 //								console.log(/*'js', url,*/ js/*, script*/, context);
 								try {
-									let temp = eval(js + '//# sourceURL=VueCompiler.js');
+									let temp = eval(js + '//# sourceURL=' + (absoluteURL.split('/').slice(-1)[0] || 'VueCompiler.js'));
 									if (hasTemplate) {
 										temp.template = template[2];
 										temp.functional = template[1].includes('functional');
