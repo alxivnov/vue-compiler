@@ -30,13 +30,37 @@ let VueCompiler = (function () {
 	return {
 		regexp: {
 			name: regexp('[^\\d\\w-]', 'g'),
-			slot: regexp('_t\\("(.*?)"\\)', 'g'),
+			slot: regexp('_t\\("([^"]+?)"\\)', 'g'),
 			src: regexp('<(template|script)[ ]*src=(?:\'|"|`)([^\'"`]*)(?:\'|"|`).*>', 'gs'),
 			template: regexp('<template([^>]*)>(.*)<\/template>', 'gs'),
 			script: regexp('<script[^>]*>(.*?)(?:export\\s+default|module.exports\\s+=)\\s+{(.*)}.*?<\/script>', 'gs'),
 			export: regexp('(.*?)(?:export\\s+default|module.exports\\s+=)\\s+{(.*)}', 'gms'),
 			import: regexp('(?:^)\\s*import(?:\\s+([^\'"`].*?)\\s+from\\s+|\\s+)(?:\'|"|`)(.*?)(?:\'|"|`);?', 'gms'),//|\\r\\n
-			absolute: regexp('\\bimport\\(([^())]+)\\)', 'g')
+			absolute: regexp('\\bimport\\(([^())]+)\\)', 'g'),
+
+			scopedSlot: regexp('_t\\("([^"]+?)",(.*),(.*?)\\)', 'g')
+		},
+
+		scopedSlot: function (fn) {
+			var start = -1;
+			while ((start = fn.indexOf('_t')) > -1) {
+				var end = start + 3;
+
+				var count = 1;
+				while (count) {
+					if (fn[end] == '(')
+						count++;
+					else if (fn[end] == ')')
+						count--;
+					end++;
+				}
+
+				let prev = fn.substring(start, end);
+				let curr = prev.replace(VueCompiler.regexp.scopedSlot, '(scopedSlots["$1"] ? scopedSlots["$1"].apply(null, [$3]) : $2)');
+				fn = fn.replace(prev, curr);
+			}
+
+			return fn;
 		},
 
 		import: function (components, mixins) {
@@ -125,17 +149,19 @@ let VueCompiler = (function () {
 								//
 //								console.log(/*'js', url,*/ js/*, script*/, context);
 								try {
-									let temp = eval(js + '//# sourceURL=' + (absoluteURL.split('/').slice(-1)[0] || 'VueCompiler.js'));
+									let name = absoluteURL.split('/').slice(-1)[0] || 'VueCompiler.js';
+									let temp = eval(js + '//# sourceURL=' + name);
 									if (hasTemplate) {
 										temp.template = template[2];
 										temp.functional = template[1].includes('functional');
 
 										if (temp.functional) {
 											let res = Vue.compile(temp.template);
-											let fn = res.render.toString()
+											let fn = VueCompiler.scopedSlot(res.render.toString()
 												.replace('anonymous(', '(_h, _vm')
 												.replace('with(this)', 'with(_vm)')
-												.replace(VueCompiler.regexp.slot, 'slots().$1');
+												.replace(VueCompiler.regexp.slot, 'slots()["$1"]'));
+
 											temp.render = eval('(' + fn + ')');
 											temp.staticRenderFns = res.staticRenderFns;
 											delete temp.template;
