@@ -1,18 +1,35 @@
+<!--
+<tab-content>
+	<tab-pane id="" active>
+</tab-content>
+-->
+
 <template functional>
-	<ul :class="['list-group', props.flush != null && 'list-group-flush']">
-		<li class="list-group-item" v-for="(item, i) in props.items" :key="i">
-			<slot :item="item">
+	<div
+		:class="[
+			'list-group',
+			props.flush !== undefined && props.flush !== false && 'list-group-flush',
+			props.horizontal !== undefined && props.horizontal !== false && ('list-group-horizontal' + (
+				['sm', 'md', 'lg', 'xl'].includes(props.horizontal) ? ('-' + props.horizontal) : ''
+			))
+		]"
+		v-bind="data.attrs"
+		v-on="listeners"
+	>
+		<slot v-for="(item, i) in props.items" :item="item">
+			<p :key="i" class="list-group-item">
 				{{ item }}
-			</slot>
-		</li>
-	</ul>
+			</p>
+		</slot>
+	</div>
 </template>
 
 <script>
 export default {
 	props: [
 		'items',		// []
-		'flush'
+		'flush',
+		'horizontal'	// undefined|sm|md|lg|xl
 	]
 }
 </script>
