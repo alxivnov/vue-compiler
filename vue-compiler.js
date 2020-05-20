@@ -56,7 +56,7 @@ let VueCompiler = (function () {
 				}
 
 				let prev = fn.substring(start, end);
-				let curr = prev.replace(VueCompiler.regexp.scopedSlot, '(scopedSlots["$1"] ? scopedSlots["$1"].apply(null, [$3]) : $2)');
+				let curr = prev.replace(VueCompiler.regexp.scopedSlot, '(scopedSlots["$1"] ? scopedSlots["$1"]($3) : $2)');
 				fn = fn.replace(prev, curr);
 			}
 

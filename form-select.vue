@@ -48,7 +48,11 @@
 					: null
 			]"
 		>
-			<slot name="options"></slot>
+			<slot name="option" v-for="(option, i) in props.options" :option="option">
+				<option :key="i">
+					{{ option }}
+				</option>
+			</slot>
 		</select>
 		<small v-show="slots().text" class="form-text text-muted">
 			<slot name="text"></slot>
@@ -67,12 +71,14 @@ export default {
 	inheritAttrs: false,
 
 	props: [
-		'col',	// auto|...
-		'row',	// true|FALSE
+		'col',					// auto|...
+		'row',					// true|FALSE
 
-		'size',	// lg|sm
+		'size',					// lg|sm
 
-		'feedback-tooltips'	// FALSE|true
+		'feedback-tooltips',	// FALSE|true
+
+		'options'				//
 	]
 	//	multiple
 	//	readonly
