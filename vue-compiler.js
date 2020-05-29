@@ -33,8 +33,8 @@ let VueCompiler = (function () {
 			slot: regexp('_t\\("([^"]+?)"\\)', 'g'),
 			src: regexp('<(template|script)[ ]*src=(?:\'|"|`)([^\'"`]*)(?:\'|"|`).*>', 'gs'),
 			template: regexp('<template([^>]*)>(.*)<\/template>', 'gs'),
-			script: regexp('<script[^>]*>(.*?)(?:export\\s+default|module.exports\\s+=)\\s+{(.*)}.*?<\/script>', 'gs'),
-			export: regexp('(.*?)(?:export\\s+default|module.exports\\s+=)\\s+{(.*)}', 'gms'),
+			script: regexp('<script[^>]*>(.*?)(?:export\\s+default|module.exports\\s+=)\\s+(.*)<\/script>', 'gs'),
+			export: regexp('(.*?)(?:export\\s+default|module.exports\\s+=)\\s+(.*)', 'gms'),
 			import: regexp('(?:^)\\s*import(?:\\s+([^\'"`].*?)\\s+from\\s+|\\s+)(?:\'|"|`)(.*?)(?:\'|"|`);?', 'gms'),//|\\r\\n
 			absolute: regexp('\\bimport\\(([^())]+)\\)', 'g'),
 
@@ -145,7 +145,7 @@ let VueCompiler = (function () {
 //						console.log('imps', imps);
 						let last = function (context) {
 							return new Promise(function (resolve, reject) {
-								let js = context.main ? context.init + '({' + context.main + '})' : '({})';
+								let js = context.main ? '(function(){' + context.init + '\r\nreturn ' + context.main + '}())' : '({})';
 								//
 //								console.log(/*'js', url,*/ js/*, script*/, context);
 								try {
