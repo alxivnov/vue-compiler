@@ -149,14 +149,14 @@ let VueCompiler = (function () {
 //								console.log(/*'js', url,*/ js/*, script*/, context);
 								try {
 									let name = absoluteURL.split('/').slice(-1)[0] || 'VueCompiler.js';
-									let func = '(function(){' + context.init + '\r\nreturn ' + context.main + '\r\n})';
+									let func = '(function(){' + context.init + 'return ' + context.main + '})';
 									let temp = context.main ? eval(func + '//# sourceURL=' + name)() : {};
 									if (hasTemplate) {
-										temp.template = template[2];
+//										temp.template = template[2];
 										temp.functional = template[1].includes('functional');
 
 										if (temp.functional) {
-											let res = Vue.compile(temp.template);
+											let res = Vue.compile(template[2]);
 											let fn = VueCompiler.scopedSlot(res.render.toString()
 												.replace('anonymous(', '(_h, _vm')
 												.replace('with(this)', 'with(_vm)')
@@ -164,7 +164,9 @@ let VueCompiler = (function () {
 
 											temp.render = eval('(' + fn + ')');
 											temp.staticRenderFns = res.staticRenderFns;
-											delete temp.template;
+//											delete temp.template;
+										} else {
+											temp.template = template[2];
 										}
 
 										temp.mixins = mixins;
