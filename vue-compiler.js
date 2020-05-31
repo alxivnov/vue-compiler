@@ -145,12 +145,12 @@ let VueCompiler = (function () {
 //						console.log('imps', imps);
 						let last = function (context) {
 							return new Promise(function (resolve, reject) {
-								let js = context.main ? '(function(){' + context.init + '\r\nreturn ' + context.main + '}())' : '({})';
 								//
 //								console.log(/*'js', url,*/ js/*, script*/, context);
 								try {
 									let name = absoluteURL.split('/').slice(-1)[0] || 'VueCompiler.js';
-									let temp = eval(js + '//# sourceURL=' + name);
+									let func = '(function(){' + context.init + '\r\nreturn ' + context.main + '\r\n})';
+									let temp = context.main ? eval(func + '//# sourceURL=' + name)() : {};
 									if (hasTemplate) {
 										temp.template = template[2];
 										temp.functional = template[1].includes('functional');
