@@ -162,7 +162,7 @@ let VueCompiler = (function () {
 												.replace('with(this)', 'with(_vm)')
 												.replace(VueCompiler.regexp.slot, 'slots()["$1"]'));
 
-											temp.render = eval('(' + fn + ')');
+											temp.render = eval('(' + fn + ')' + '//# sourceURL=' + name + '.js');
 											temp.staticRenderFns = res.staticRenderFns;
 //											delete temp.template;
 										} else {
