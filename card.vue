@@ -17,22 +17,24 @@
 				props.headerBorderColor !== undefined && props.headerBorderColor !== false && 'border-' + props.headerBorderColor
 			]"
 
-			:id="props.collapse && props.collapse + '-heading' + (props.accordion !== undefined ? '-' + props.accordion : '')"
+			:id="props.collapse && props.collapse + '-heading' + (props.accordion != null ? '-' + props.accordion : '')"
 		>
 			<div
 				:class="[
 					props.nav !== undefined && props.nav !== false && 'nav',
 					props.nav == 'tabs' && 'nav-tabs card-header-tabs',
-					props.nav == 'pills' && 'nav-pills card-header-pills'
+					props.nav == 'pills' && 'nav-pills card-header-pills',
+
+					props.collapse && props.accordion !== undefined && props.accordion && 'collapsed'
 				]"
 
-				X-class="btn btn-link btn-block text-left collapsed"
+				X-class="btn btn-link btn-block text-left"
 				X-type="button"
 
 				:data-toggle="props.collapse && 'collapse'"
-				:data-target="props.collapse && '#' + props.collapse + '-collapse' + (props.accordion !== undefined ? '-' + props.accordion : '')"
-				aria-expanded="false"
-				:aria-controls="props.collapse && props.collapse + '-collapse' + (props.accordion !== undefined ? '-' + props.accordion : '')"
+				:data-target="props.collapse && '#' + props.collapse + '-collapse' + (props.accordion != null ? '-' + props.accordion : '')"
+				:aria-expanded="props.collapse && props.accordion !== undefined && !props.accordion"
+				:aria-controls="props.collapse && props.collapse + '-collapse' + (props.accordion != null ? '-' + props.accordion : '')"
 
 				:role="props.nav !== undefined && props.nav !== false ? 'tablist' : props.collapse ? 'button' : null"
 			>
@@ -45,13 +47,14 @@
 				props.noGutters !== undefined && props.noGutters !== false && 'row no-gutters',
 
 				props.collapse && 'collapse',
+				props.collapse && props.accordion !== undefined && !props.accordion && 'show',
 
-				props.nav !== undefined && props.nnav !== false && 'tab-content'
+				props.nav !== undefined && props.nav !== false && 'tab-content'
 			]"
 
-			:id="props.collapse && props.collapse + '-collapse' + (props.accordion !== undefined ? '-' + props.accordion : '')"
-			:aria-labelledby="props.collapse && props.collapse + '-heading' + (props.accordion !== undefined ? '-' + props.accordion : '')"
-			:data-parent="props.collapse && props.accordion !== undefined && '#' + props.collapse"
+			:id="props.collapse && props.collapse + '-collapse' + (props.accordion != null ? '-' + props.accordion : '')"
+			:aria-labelledby="props.collapse && props.collapse + '-heading' + (props.accordion != null ? '-' + props.accordion : '')"
+			:data-parent="props.collapse && props.accordion != null && '#' + props.collapse"
 		>
 			<slot></slot>
 		</div>

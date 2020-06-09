@@ -197,10 +197,10 @@
 		</div>
 		<div class="row mt-3">
 			<div id="accordion" class="col accordion">
-				<card v-for="i in [1, 2, 3]" :key="i" collapse="accordion" :accordion="i" header-text-color="primary">
+				<card v-for="i in [0, 1, 2]" :key="i" collapse="accordion" :accordion="i" header-text-color="primary">
 					<template #header>
 						<!-- <btn btn-style="link" block> -->
-							{{ header + ' №' + i }}
+							{{ header + ' №' + (i + 1) }}
 						<!-- </btn> -->
 					</template>
 					<card-body :title="title" :text="text"></card-body>
