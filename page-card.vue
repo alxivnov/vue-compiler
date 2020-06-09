@@ -1,23 +1,5 @@
 <template>
-	<div class="m-3">
-		<div class="row">
-			<div id="accordion" class="col">
-				<card v-for="i in [1, 2, 3, 4, 5]" :key="i" accordion="accordion" :accordion-id="i" border-color="danger">
-					<template #header>
-						{{ header + ' №' + i }}
-					</template>
-					<card-body :title="title" :text="text"></card-body>
-				</card>
-			</div>
-			<div id="collapse" class="col">
-				<card border-color="danger">
-					<template #header>
-						{{ header }}
-					</template>
-					<card-body :title="title" :text="text"></card-body>
-				</card>
-			</div>
-		</div>
+	<div class="my-3">
 		<div class="row-X card-columns mt-3">
 			<!-- <div class="col"> -->
 				<card>
@@ -48,12 +30,12 @@
 		</div>
 		<div class="row mt-3">
 			<div class="col"> -->
-				<card border-color="danger" text-color="danger">
+				<card>
 					<list-group :items="items" flush></list-group>
 				</card>
 			<!-- </div>
 			<div class="col"> -->
-				<card border-color="danger" text-color="danger" header-bg-color="danger" header-border-color="danger" header-text-color="white">
+				<card border-color="primary" text-color="primary" header-bg-color="primary" header-border-color="primary" header-text-color="white">
 					<template #header>
 						{{ header }}
 					</template>
@@ -61,10 +43,12 @@
 				</card>
 			<!-- </div>
 			<div class="col"> -->
-				<card border-color="danger" text-color="danger">
+				<card>
 					<card-img :src="image" place="top"></card-img>
 					<card-body :title="title" :text="text"></card-body>
-					<list-group :items="items" flush></list-group>
+					<div class="border-top border-bottom">
+						<list-group :items="items" flush></list-group>
+					</div>
 					<card-body :links="links"></card-body>
 				</card>
 			<!-- </div>
@@ -94,23 +78,73 @@
 				</card>
 			<!-- </div>
 			<div class="col"> -->
-				<card border-color="danger" text-color="danger" header-border-color="danger">
+				<card nav="tabs">
 					<template #header>
-						Tabs
+						<a
+							v-for="i in [1, 2, 3]"
+							:key="i"
+
+							:class="['nav-item', 'nav-link', i == 1 && 'active']"
+							data-toggle="tab"
+							:href="'#tabpanel-' + i"
+
+							role="tab"
+							:id="'tab-' + i"
+							:aria-controls="'tabpanel-' + i"
+							:aria-selected="i == 1"
+						>
+							{{ 'Tab ' + i }}
+						</a>
 					</template>
-					<card-body :title="title" :text="text">
-						<btn>{{ button }}</btn>
-					</card-body>
+					<div
+						v-for="i in [1, 2, 3]"
+						:key="i"
+
+						:class="['tab-pane', i == 1 && 'show', i == 1 && 'active']"
+						:id="'tabpanel-' + i"
+
+						role="tabpanel"
+						:aria-labelledby="'tab-' + i"
+					>
+						<card-body :title="title + ' ' + i" :text="text">
+							<btn>{{ button }}</btn>
+						</card-body>
+					</div>
 				</card>
 			<!-- </div>
 			<div class="col"> -->
-				<card border-color="danger" text-color="danger" header-border-color="danger">
+				<card nav="pills">
 					<template #header>
-						Pills
+						<a
+							v-for="i in [1, 2, 3]"
+							:key="i"
+
+							:class="['nav-item', 'nav-link', i == 1 && 'active']"
+							data-toggle="pill"
+							:href="'#pillpanel-' + i"
+
+							role="tab"
+							:id="'pill-' + i"
+							:aria-controls="'pillpanel-' + i"
+							:aria-selected="i == 1"
+						>
+							{{ 'Pill ' + i }}
+						</a>
 					</template>
-					<card-body :title="title" :text="text">
-						<btn>{{ button }}</btn>
-					</card-body>
+					<div
+						v-for="i in [1, 2, 3]"
+						:key="i"
+
+						:class="['tab-pane', i == 1 && 'show', i == 1 && 'active']"
+						:id="'pillpanel-' + i"
+
+						role="tabpanel"
+						:aria-labelledby="'pill-' + i"
+					>
+						<card-body :title="title + ' ' + i" :text="text">
+							<btn>{{ button }}</btn>
+						</card-body>
+					</div>
 				</card>
 			<!-- </div>
 			<div class="col"> -->
@@ -128,7 +162,7 @@
 				</card>
 			<!-- </div>
 			<div class="col"> -->
-				<card no-gutters border-color="danger" text-color="danger">
+				<card no-gutters>
 					<card-img col :src="v_image"></card-img>
 					<card-body col :title="title" :text="text"></card-body>
 				</card>
@@ -139,30 +173,54 @@
 			</div> -->
 		</div>
 		<div class="row mt-3">
-			<div class="col card-deck">
-				<card v-for="i in [1, 2, 3, 4, 5]" :key="i" border-color="danger">
-					<card-body :title="title" :text="text">
-						<small class="text-muted">{{ 'Card №' + i }}</small>
-					</card-body>
-				</card>
+			<div class="col">
+				<div class="card-group">
+					<card v-for="i in [1, 2, 3, 4]" :key="i">
+						<card-body :title="title" :text="text"></card-body>
+						<template #footer>
+							{{ 'Card №' + i }}
+						</template>
+					</card>
+				</div>
 			</div>
 		</div>
 		<div class="row mt-3">
-			<div class="col card-group">
-				<card v-for="i in [1, 2, 3, 4]" :key="i">
-					<card-body :title="title" :text="text"></card-body>
-					<template #footer>
-						{{ 'Card №' + i }}
+			<div class="col">
+				<div class="card-deck">
+					<card v-for="i in [1, 2, 3, 4, 5]" :key="i">
+						<card-body :title="title" :text="text">
+							<small class="text-muted">{{ 'Card №' + i }}</small>
+						</card-body>
+					</card>
+				</div>
+			</div>
+		</div>
+		<div class="row mt-3">
+			<div id="accordion" class="col accordion">
+				<card v-for="i in [1, 2, 3]" :key="i" collapse="accordion" :accordion="i" header-text-color="primary">
+					<template #header>
+						<!-- <btn btn-style="link" block> -->
+							{{ header + ' №' + i }}
+						<!-- </btn> -->
 					</template>
+					<card-body :title="title" :text="text"></card-body>
+				</card>
+			</div>
+			<div class="col">
+				<card collapse="collapse" header-border-color="light" header-text-color="primary">
+					<template #header>
+						<!-- <btn btn-style="link" block> -->
+							{{ header }}
+						<!-- </btn> -->
+					</template>
+					<card-body :title="title" :text="text"></card-body>
 				</card>
 			</div>
 		</div>
 		<!--
-			accordeon
-			collapse
-			nav tabs
-			nav pills
-			list-group
+			col
+			tabs
+			pills
 		-->
 	</div>
 </template>

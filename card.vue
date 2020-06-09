@@ -1,9 +1,3 @@
-<!--
-nav
-card-group card-deck card-columns
-accordion
--->
-
 <template functional>
 	<div
 		:class="[
@@ -23,7 +17,7 @@ accordion
 				props.headerBorderColor !== undefined && props.headerBorderColor !== false && 'border-' + props.headerBorderColor
 			]"
 
-			:id="props.accordion && props.accordion + '-heading-' + props.accordionId"
+			:id="props.collapse && props.collapse + '-heading' + (props.accordion !== undefined ? '-' + props.accordion : '')"
 		>
 			<div
 				:class="[
@@ -35,12 +29,12 @@ accordion
 				X-class="btn btn-link btn-block text-left collapsed"
 				X-type="button"
 
-				:data-toggle="props.accordion && 'collapse'"
-				:data-target="props.accordion && '#' + props.accordion + '-collapse-' + props.accordionId"
+				:data-toggle="props.collapse && 'collapse'"
+				:data-target="props.collapse && '#' + props.collapse + '-collapse' + (props.accordion !== undefined ? '-' + props.accordion : '')"
 				aria-expanded="false"
-				:aria-controls="props.accordion && props.accordion + '-collapse-' + props.accordionId"
+				:aria-controls="props.collapse && props.collapse + '-collapse' + (props.accordion !== undefined ? '-' + props.accordion : '')"
 
-				X-role="button"
+				:role="props.nav !== undefined && props.nav !== false ? 'tablist' : props.collapse ? 'button' : null"
 			>
 				<slot name="header"></slot>
 			</div>
@@ -50,12 +44,14 @@ accordion
 			:class="[
 				props.noGutters !== undefined && props.noGutters !== false && 'row no-gutters',
 
-				props.accordion && 'collapse'
+				props.collapse && 'collapse',
+
+				props.nav !== undefined && props.nnav !== false && 'tab-content'
 			]"
 
-			:id="props.accordion && props.accordion + '-collapse-' + props.accordionId"
-			:aria-labelledby="props.accordion && props.accordion + '-heading-' + props.accordionId"
-			:data-parent="props.accordion && '#' + props.accordion"
+			:id="props.collapse && props.collapse + '-collapse' + (props.accordion !== undefined ? '-' + props.accordion : '')"
+			:aria-labelledby="props.collapse && props.collapse + '-heading' + (props.accordion !== undefined ? '-' + props.accordion : '')"
+			:data-parent="props.collapse && props.accordion !== undefined && '#' + props.collapse"
 		>
 			<slot></slot>
 		</div>
@@ -88,8 +84,8 @@ export default {
 		'footer-bg-color',		// primary|secondary|success|danger|warning|info|light|dark|white|transparent
 		'footer-border-color',	// primary|secondary|success|danger|warning|info|light|dark|white
 
-		'accordion',
-		'accordion-id'
+		'collapse',				// collpase id
+		'accordion'				// accordion id
 	]
 }
 </script>

@@ -17,9 +17,9 @@
 		v-on="listeners"
 	>
 		<slot v-for="(item, i) in props.items" :item="item">
-			<p :key="i" class="list-group-item">
+			<a :key="i" class="list-group-item">
 				{{ item }}
-			</p>
+			</a>
 		</slot>
 	</div>
 </template>
