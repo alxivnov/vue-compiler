@@ -149,8 +149,10 @@ let VueCompiler = (function () {
 //								console.log(/*'js', url,*/ js/*, script*/, context);
 								try {
 									let name = absoluteURL.split('/').slice(-1)[0] || 'VueCompiler.js';
-									let func = '(function(){' + context.init + 'return ' + context.main + '})';
-									let temp = context.main ? eval(func + '//# sourceURL=' + name)() : {};
+//									let func = '(function(){' + context.init + 'return ' + context.main + '})';
+//									let temp = context.main ? eval(func + '//# sourceURL=' + name)() : {};
+									let func = Function('"use strict";' + (context.init || '') + 'return(' + (context.main || '{}') + ')' + '//# sourceURL=' + name);
+									let temp = context.main ? func() : {};
 									if (hasTemplate) {
 //										temp.template = template[2];
 										temp.functional = template[1].includes('functional');
@@ -162,7 +164,8 @@ let VueCompiler = (function () {
 												.replace('with(this)', 'with(_vm)')
 												.replace(VueCompiler.regexp.slot, 'slots()["$1"]'));
 
-											temp.render = eval('(' + fn + ')' + '//# sourceURL=' + name + '.js');
+//											temp.render = eval('(' + fn + ')' + '//# sourceURL=' + name + '.js');
+											temp.render = Function('_h', '_vm', fn.substring(fn.indexOf('\n'), fn.lastIndexOf('\n')) + '//# sourceURL=' + name + '.js');
 											temp.staticRenderFns = res.staticRenderFns;
 //											delete temp.template;
 										} else {

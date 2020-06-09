@@ -1,5 +1,7 @@
 <template>
 	<div class="my-3">
+		<a href="https://github.com/alxivnov/vue-compiler/blob/master/page-card.vue" class="link">Source</a>
+
 		<div class="row-X card-columns mt-3">
 			<!-- <div class="col"> -->
 				<card>

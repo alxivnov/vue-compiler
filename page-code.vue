@@ -1,6 +1,8 @@
 <template>
-	<div>
-		<pre class="m-3 bg-light border rounded">
+	<div class="my-3">
+		<a href="https://github.com/alxivnov/vue-compiler/blob/master/page-code.vue" class="link">Source</a>
+
+		<pre class="bg-light border rounded mt-3">
 			<code :class="{
 				'font-weight-bold': font == 1,
 				'font-italic': font == 2
