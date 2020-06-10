@@ -143,12 +143,16 @@ let VueCompiler = (function () {
 							return new Promise(function (resolve, reject) {
 								//
 //								console.log(/*'js', url,*/ js/*, script*/, context);
+								let name = absoluteURL.split('/').slice(-1)[0] || 'VueCompiler.js';
+								let func = context.main
+									? '"use strict";' + (context.init || '') + 'return(' + (context.main.replace(/[\s;]+$/, '') || '{}') + ')'
+									: null;
 								try {
-									let name = absoluteURL.split('/').slice(-1)[0] || 'VueCompiler.js';
 //									let func = '(function(){' + context.init + 'return ' + context.main + '})';
 //									let temp = context.main ? eval(func + '//# sourceURL=' + name)() : {};
-									let func = Function('context', '"use strict";' + (context.init || '') + 'return(' + (context.main || '{}') + ')' + '//# sourceURL=' + name);
-									let temp = context.main ? func(context) : {};
+									var temp = func
+										? Function('context', func + '//# sourceURL=' + name)(context)
+										: {};
 									if (hasTemplate) {
 //										temp.template = template[2];
 										temp.functional = template[1].includes('functional');
@@ -161,7 +165,7 @@ let VueCompiler = (function () {
 												.replace(VueCompiler.regexp.slot, 'slots()["$1"]'));
 
 //											temp.render = eval('(' + fn + ')' + '//# sourceURL=' + name + '.js');
-											temp.render = Function('_h', '_vm', fn.substring(fn.indexOf('\n'), fn.lastIndexOf('\n')) + '//# sourceURL=' + name + '.js');
+											temp.render = Function('_h', '_vm', fn.substring(fn.indexOf('{') + 1, fn.lastIndexOf('}') - 1) + '//# sourceURL=' + name + '.js');
 											temp.staticRenderFns = res.staticRenderFns;
 //											delete temp.template;
 										} else {
@@ -173,9 +177,10 @@ let VueCompiler = (function () {
 
 									resolve(temp);
 								} catch (err) {
-									err.js = context;
+									err.name = name;
+									err.func = func;
 
-									console.log('eval', err/*, err.lineNumber, js*/);
+									console.log('eval', err, name, func);
 
 									reject(err);
 								}
@@ -185,9 +190,10 @@ let VueCompiler = (function () {
 							return imp.length > 2;
 						}).map(function (imp) {
 							return function (context) {
-								return VueCompiler.download(VueCompiler.absolute(imp[2], absoluteURL), context.mixins).then(function (def) {
+								let impURL = VueCompiler.absolute(imp[2], absoluteURL);
+								return VueCompiler.download(impURL, context.mixins).then(function (def) {
 									if (def instanceof Object || def == null) {
-										context.defs[imp[2]] = def;
+										context.defs[impURL] = def;
 										let name = imp[1] || imp[2]
 											.split('/')
 											.slice(-1)[0]
@@ -200,7 +206,7 @@ let VueCompiler = (function () {
 											.join('');
 										//
 //										console.log('def', imp, name);
-										def = 'let ' + name + ' = context.defs[\'' + imp[2] + '\'];';
+										def = 'let ' + name + ' = context.defs[\'' + impURL + '\'];';
 									}
 
 									context.init = context.init.replace(imp[0], def);
