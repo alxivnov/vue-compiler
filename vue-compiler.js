@@ -26,6 +26,13 @@ let VueCompiler = (function () {
 
 		return regs;
 	};
+	JSON.tryParse = function (string) {
+		try {
+			return JSON.parse(string);
+		} catch {
+			return undefined;
+		}
+	};
 
 	return {
 		regexp: {
@@ -126,8 +133,11 @@ let VueCompiler = (function () {
 						let hasTemplate = !!template && template.length > 2;
 						let hasScript = !!script && script.length > 2;
 
-						if (!hasTemplate && !hasScript)
-							return text ? { template: '<span>' + text + '</span>' } : null;//text;
+						if (!hasTemplate && !hasScript) {
+							let json = JSON.tryParse(text);
+
+							return json === undefined ? text ? { template: '<span>' + text + '</span>' } : null : json;//text;
+						}
 
 						let absoluteURL = VueCompiler.absolute(url, document.baseURI);
 
