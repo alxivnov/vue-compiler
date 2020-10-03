@@ -78,11 +78,11 @@
 			}
 		};
 
-		if (Vue.component) {	// v2
+		if (Vue.component) {						// v2
 			VueCompiler.import(comp);
 
 			let vue = new Vue(app);
-		} else {				// v3
+		} else {									// v3
 			VueCompiler.app = Vue.createApp(app);
 
 			VueCompiler.import(comp);

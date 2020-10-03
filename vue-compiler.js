@@ -174,29 +174,39 @@ let VueCompiler = (function () {
 									? '"use strict";' + (context.init || '') + 'return(' + (context.main.replace(/[\s;]+$/, '') || '{}') + ')'
 									: null;
 								try {
-//									let func = '(function(){' + context.init + 'return ' + context.main + '})';
-//									let temp = context.main ? eval(func + '//# sourceURL=' + name)() : {};
+									//									let func = '(function(){' + context.init + 'return ' + context.main + '})';
+									//									let temp = context.main ? eval(func + '//# sourceURL=' + name)() : {};
 									var temp = func
 										? Function('context', func + '//# sourceURL=' + name)(context)
 										: {};
 									if (hasTemplate) {
-//										temp.template = template[2];
-										temp.functional = template[1].includes('functional')
-											&& !VueCompiler.app;
+										//										temp.template = template[2];
+										temp.functional = template[1].includes('functional');
 
-										if (temp.functional) {
-											let res = Vue.compile(template[2]);
-											let fn = VueCompiler.scopedSlot(res.render.toString()
-												.replace('anonymous(', '(_h, _vm')
-												.replace('with(this)', 'with(_vm)')
-												.replace(VueCompiler.regexp.slot, 'slots()["$1"]'));
-
-//											temp.render = eval('(' + fn + ')' + '//# sourceURL=' + name + '.js');
-											temp.render = Function('_h', '_vm', fn.substring(fn.indexOf('{') + 1, fn.lastIndexOf('}') - 1) + '//# sourceURL=' + name + '.js');
-											temp.staticRenderFns = res.staticRenderFns;
-//											delete temp.template;
+										if (VueCompiler.app) {
+											temp.template = temp.functional
+												? template[2]
+													.replace('v-bind="data.attrs"', 'v-bind="$attrs"')
+													.replace('v-on="listeners"', '')
+													.replace(/props\./g, 'this.')
+													.replace(/slots\(\)/g, 'this.$slots')
+													.replace(/data\./g, 'this.$data.')
+												: template[2];
 										} else {
-											temp.template = template[2];
+											if (temp.functional) {
+												let res = Vue.compile(template[2]);
+												let fn = VueCompiler.scopedSlot(res.render.toString()
+													.replace('anonymous(', '(_h, _vm')
+													.replace('with(this)', 'with(_vm)')
+													.replace(VueCompiler.regexp.slot, 'slots()["$1"]'));
+
+//												temp.render = eval('(' + fn + ')' + '//# sourceURL=' + name + '.js');
+												temp.render = Function('_h', '_vm', fn.substring(fn.indexOf('{') + 1, fn.lastIndexOf('}') - 1) + '//# sourceURL=' + name + '.js');
+												temp.staticRenderFns = res.staticRenderFns;
+//												delete temp.template;
+											} else {
+												temp.template = template[2];
+											}
 										}
 
 										temp.mixins = context.mixins;
