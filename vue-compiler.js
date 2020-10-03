@@ -95,7 +95,16 @@ let VueCompiler = (function () {
 				let def = VueCompiler.download(components[name], mixins);
 
 				if (VueCompiler.app)
-					VueCompiler.app.component(name, Vue.defineAsyncComponent(def));
+//					VueCompiler.app.component(name, Vue.defineAsyncComponent(def));
+					VueCompiler.app.component(name, Vue.defineAsyncComponent(() => new Promise((resolve, reject) => {
+						def
+							.then(function (def) {
+								resolve(def);
+							})
+							.catch(function (err) {
+								reject(err);
+							});
+					})));
 				else
 					Vue.component(name, function (resolve, reject) {
 						return def

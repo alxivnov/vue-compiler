@@ -16,7 +16,7 @@
 		<p class="mt-3">
 			Script that enables usage of Vue.js Single File Components directly in browser. <a href="https://github.com/alxivnov/vue-compiler/" class="link">GitHub</a>
 		</p>
-		<ul class="nav nav-tabs mt-3">
+		<!-- <ul class="nav nav-tabs mt-3">
 			<li class="nav-item">
 				<a :class="{
 					'nav-link': true,
@@ -31,7 +31,8 @@
 			</li>
 		</ul>
 
-		<component :is="page"></component>
+		<component :is="page"></component> -->
+		<test></test>
 	</div>
 
 	<script src="https://code.jquery.com/jquery-3.5.1.slim.min.js" integrity="sha384-DfXdz2htPH0lsSSs5nCTpuj/zy4C+OGpamoFVy38MVBnE+IbbVYUew+OrCXaRkfj" crossorigin="anonymous"></script>
@@ -81,11 +82,20 @@
 		if (Vue.component) {	// v2
 			VueCompiler.import(comp);
 
-			let vue = new Vue(app);
+			let inst = new Vue(app);
 		} else {				// v3
 			VueCompiler.app = Vue.createApp(app);
 
-			VueCompiler.import(comp);
+			// VueCompiler.import(comp);
+
+			VueCompiler.app.component('test', Vue.defineAsyncComponent(() => new Promise((resolve, reject) => {
+				let def = {
+					template: '<h1>Works!</h1>'
+				};
+				setTimeout(() => {
+					resolve(def);
+				}, 3000);
+			})));
 
 			VueCompiler.app.mount(app.el);
 		}
