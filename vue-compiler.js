@@ -35,6 +35,8 @@ let VueCompiler = (function () {
 	};
 
 	return {
+		app: null,
+
 		regexp: {
 			name: regexp('[^\\d\\w-]', 'g'),
 			slot: regexp('_t\\("([^"]+?)"\\)', 'g'),
@@ -90,15 +92,20 @@ let VueCompiler = (function () {
 				}, {});
 
 			Object.keys(components).forEach(function (name) {
-				Vue.component(name, function (resolve, reject) {
-					VueCompiler.download(components[name], mixins)
-						.then(function (def) {
-							resolve(def);
-						})
-						.catch(function (err) {
-							reject(err);
-						});
-				});
+				let def = VueCompiler.download(components[name], mixins);
+
+				if (VueCompiler.app)
+					VueCompiler.app.component(name, Vue.defineAsyncComponent(def));
+				else
+					Vue.component(name, function (resolve, reject) {
+						return def
+							.then(function (def) {
+								resolve(def);
+							})
+							.catch(function (err) {
+								reject(err);
+							});
+					});
 			});
 		},
 
@@ -165,7 +172,8 @@ let VueCompiler = (function () {
 										: {};
 									if (hasTemplate) {
 //										temp.template = template[2];
-										temp.functional = template[1].includes('functional');
+										temp.functional = template[1].includes('functional')
+											&& !VueCompiler.app;
 
 										if (temp.functional) {
 											let res = Vue.compile(template[2]);

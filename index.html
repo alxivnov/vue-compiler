@@ -39,11 +39,12 @@
 	<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.0/js/bootstrap.min.js" integrity="sha384-OgVRvuATP1z7JjHLkuOU7Xw704+h835Lr+6QL9UvYjZE3Ipu6Tp75j7Bh/kR0JKI" crossorigin="anonymous"></script>
 
 	<script src="https://cdn.jsdelivr.net/npm/vue"></script>
+	<!-- <script src="https://unpkg.com/vue@next"></script> -->
 
 	<script src="./vue-compiler.js"></script>
 
 	<script>
-		VueCompiler.import([
+		let comp = [
 			'btn-group.vue',
 			'btn.vue',
 			'dropdown-divider.vue',
@@ -66,14 +67,27 @@
 
 			'page-code.vue',
 			'page-card.vue'
-		]);
+		];
 
-		var app = new Vue({
+		let app = {
 			el: '#app',
-			data: {
-				page: 'page-code',
+			data: function() {
+				return {
+					page: 'page-code',
+				};
 			}
-		});
+		};
+
+		if (Vue.component) {	// v2
+			VueCompiler.import(comp);
+
+			let inst = new Vue(app);
+		} else {				// v3
+			VueCompiler.app = Vue.createApp(app);
+			VueCompiler.app.mount(app.el);
+
+			VueCompiler.import(comp);
+		}
 	</script>
 </body>
 </html>
