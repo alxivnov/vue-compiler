@@ -69,25 +69,23 @@
 			'page-card.vue'
 		];
 
-		let app = {
+		let opts = {
 			el: '#app',
-			data: function() {
-				return {
-					page: 'page-code',
-				};
+			data: {
+				page: 'page-code',
 			}
 		};
 
 		if (Vue.component) {						// v2
 			VueCompiler.import(comp);
 
-			let vue = new Vue(app);
+			let app = new Vue(opts);
 		} else {									// v3
-			VueCompiler.app = Vue.createApp(app);
+			VueCompiler.app = Vue.createApp(Vue.migrateOptions(opts));
 
 			VueCompiler.import(comp);
 
-			VueCompiler.app.mount(app.el);
+			VueCompiler.app.mount(opts.el);
 		}
 	</script>
 </body>

@@ -1,9 +1,9 @@
 <template functional>
 	<li class="nav-item dropdown">
-		<a class="nav-link dropdown-toggle" href="#" :id="(props.id || 'dropdown') + '-menu'" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+		<a class="nav-link dropdown-toggle" href="#" :id="(data.attrs.id || 'dropdown') + '-menu'" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
 			<slot></slot>
 		</a>
-		<div class="dropdown-menu" :aria-labelledby="(props.id || 'dropdown') + '-menu'">
+		<div class="dropdown-menu" :aria-labelledby="(data.attrs.id || 'dropdown') + '-menu'">
 			<slot name="dropdown"></slot>
 		</div>
 	</li>

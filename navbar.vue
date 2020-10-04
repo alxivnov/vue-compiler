@@ -16,10 +16,10 @@
 			<slot name="brand"></slot>
 		</a>
 
-		<button class="navbar-toggler" type="button" data-toggle="collapse" :data-target="'#' + (props.id || 'navbar') + '-collapse'" :aria-controls="(props.id || 'navbar') + '-collapse'" aria-expanded="false" aria-label="Toggle navigation">
+		<button class="navbar-toggler" type="button" data-toggle="collapse" :data-target="'#' + (data.attrs.id || 'navbar') + '-collapse'" :aria-controls="(data.attrs.id || 'navbar') + '-collapse'" aria-expanded="false" aria-label="Toggle navigation">
 			<span class="navbar-toggler-icon"></span>
 		</button>
-		<div class="collapse navbar-collapse" :id="(props.id || 'navbar') + '-collapse'">
+		<div class="collapse navbar-collapse" :id="(data.attrs.id || 'navbar') + '-collapse'">
 			<div class="navbar-nav mr-auto">
 				<slot></slot>
 			</div>

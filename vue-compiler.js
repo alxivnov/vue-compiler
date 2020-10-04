@@ -34,6 +34,12 @@ let VueCompiler = (function () {
 		}
 	};
 
+	Vue.migrateOptions = function (options) {
+		return typeof (options.data) == 'function'
+			? options
+			: Object.assign({}, options, { data: function () { return options.data; } });
+	};
+
 	return {
 		app: null,
 
@@ -174,13 +180,13 @@ let VueCompiler = (function () {
 									? '"use strict";' + (context.init || '') + 'return(' + (context.main.replace(/[\s;]+$/, '') || '{}') + ')'
 									: null;
 								try {
-									//									let func = '(function(){' + context.init + 'return ' + context.main + '})';
-									//									let temp = context.main ? eval(func + '//# sourceURL=' + name)() : {};
+//									let func = '(function(){' + context.init + 'return ' + context.main + '})';
+//									let temp = context.main ? eval(func + '//# sourceURL=' + name)() : {};
 									var temp = func
 										? Function('context', func + '//# sourceURL=' + name)(context)
 										: {};
 									if (hasTemplate) {
-										//										temp.template = template[2];
+//										temp.template = template[2];
 										temp.functional = template[1].includes('functional');
 
 										if (VueCompiler.app) {
