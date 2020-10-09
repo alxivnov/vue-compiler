@@ -34,6 +34,11 @@ let VueCompiler = (function () {
 		}
 	};
 
+//	if (Vue.component)						// v2
+//		Vue.import = importComponents;
+//	else									// v3
+//		Vue.prototype.import = importComponents;
+
 	return {
 		regexp: {
 			name: regexp('[^\\d\\w-]', 'g'),
@@ -70,35 +75,50 @@ let VueCompiler = (function () {
 			return fn;
 		},
 
-		import: function (components, mixins) {
-			if (typeof (components) == 'string')
-				components = [components];
+	import: function (components, mixins) {
+		if (typeof (components) == 'string')
+			components = [components];
 
-			if (Array.isArray(components))
-				components = components.reduce(function (prev, curr) {
-					let name = curr
-						.split('/')
-						.slice(-1)[0]
-						.split('.')
-						.slice(0, -1)
-						.map(function (el) {
-							return el.replace(VueCompiler.regexp.name, '-');
-						})
-						.join('-');
-					prev[name] = curr;
-					return prev;
-				}, {});
+		if (Array.isArray(components))
+			components = components.reduce(function (prev, curr) {
+				let name = curr
+					.split('/')
+					.slice(-1)[0]
+					.split('.')
+					.slice(0, -1)
+					.map(function (el) {
+						return el.replace(VueCompiler.regexp.name, '-');
+					})
+					.join('-');
+				prev[name] = curr;
+				return prev;
+			}, {});
 
+			let component = this.component;
 			Object.keys(components).forEach(function (name) {
-				Vue.component(name, function (resolve, reject) {
-					VueCompiler.download(components[name], mixins)
-						.then(function (def) {
-							resolve(def);
-						})
-						.catch(function (err) {
-							reject(err);
-						});
-				});
+				let def = VueCompiler.download(components[name], mixins);
+
+				if (!Vue.component)
+//					component(name, Vue.defineAsyncComponent(def));
+					component(name, Vue.defineAsyncComponent(() => new Promise((resolve, reject) => {
+						def
+							.then(function (def) {
+								resolve(def);
+							})
+							.catch(function (err) {
+								reject(err);
+							});
+					})));
+				else
+					Vue.component(name, function (resolve, reject) {
+						return def
+							.then(function (def) {
+								resolve(def);
+							})
+							.catch(function (err) {
+								reject(err);
+							});
+					});
 			});
 		},
 
@@ -167,19 +187,31 @@ let VueCompiler = (function () {
 //										temp.template = template[2];
 										temp.functional = template[1].includes('functional');
 
-										if (temp.functional) {
-											let res = Vue.compile(template[2]);
-											let fn = VueCompiler.scopedSlot(res.render.toString()
-												.replace('anonymous(', '(_h, _vm')
-												.replace('with(this)', 'with(_vm)')
-												.replace(VueCompiler.regexp.slot, 'slots()["$1"]'));
-
-//											temp.render = eval('(' + fn + ')' + '//# sourceURL=' + name + '.js');
-											temp.render = Function('_h', '_vm', fn.substring(fn.indexOf('{') + 1, fn.lastIndexOf('}') - 1) + '//# sourceURL=' + name + '.js');
-											temp.staticRenderFns = res.staticRenderFns;
-//											delete temp.template;
+										if (!Vue.component) {
+											temp.template = temp.functional
+												? template[2]
+//													.replace('v-bind="data.attrs"', 'v-bind="this.$attrs"')
+													.replace('v-on="listeners"', '')
+													.replace(/data\.attrs/g, 'this.$attrs')
+													.replace(/data\./g, 'this.$data.')
+													.replace(/props\./g, 'this.')
+													.replace(/slots\(\)/g, 'this.$slots')
+												: template[2];
 										} else {
-											temp.template = template[2];
+											if (temp.functional) {
+												let res = Vue.compile(template[2]);
+												let fn = VueCompiler.scopedSlot(res.render.toString()
+													.replace('anonymous(', '(_h, _vm')
+													.replace('with(this)', 'with(_vm)')
+													.replace(VueCompiler.regexp.slot, 'slots()["$1"]'));
+
+//												temp.render = eval('(' + fn + ')' + '//# sourceURL=' + name + '.js');
+												temp.render = Function('_h', '_vm', fn.substring(fn.indexOf('{') + 1, fn.lastIndexOf('}') - 1) + '//# sourceURL=' + name + '.js');
+												temp.staticRenderFns = res.staticRenderFns;
+//												delete temp.template;
+											} else {
+												temp.template = template[2];
+											}
 										}
 
 										temp.mixins = context.mixins;
@@ -243,6 +275,32 @@ let VueCompiler = (function () {
 						});
 				});
 			}, Promise.resolve(text));
+		},
+
+		createApp(options, components) {
+			var app = null;
+
+			if (Vue.component) {
+				if (components)
+					this.import(components);
+
+				app = new Vue(options);
+			} else {
+				app = Vue.createApp(
+					typeof (options.data) == 'function'
+						? options
+						: Object.assign({}, options, { data: function () { return options.data; } })
+				);
+
+				app.import = this.import.bind(app);
+				if (components)
+					app.import(components);
+
+				if (options.el)
+					app.mount(options.el);
+			}
+
+			return app;
 		}
 	};
 }());

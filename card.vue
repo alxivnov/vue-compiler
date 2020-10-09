@@ -54,7 +54,7 @@
 
 			:id="props.collapse && props.collapse + '-collapse' + (props.accordion != null ? '-' + props.accordion : '')"
 			:aria-labelledby="props.collapse && props.collapse + '-heading' + (props.accordion != null ? '-' + props.accordion : '')"
-			:data-parent="props.collapse && props.accordion != null && '#' + props.collapse"
+			:data-parent="props.collapse && props.accordion != null && '#' + props.collapse || null"
 		>
 			<slot></slot>
 		</div>
