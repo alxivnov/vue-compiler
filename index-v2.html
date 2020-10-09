@@ -71,8 +71,10 @@
 
 		let opts = {
 			el: '#app',
-			data: {
-				page: 'page-code',
+			data() {
+				return {
+					page: 'page-code',
+				};
 			}
 		};
 

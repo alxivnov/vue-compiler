@@ -34,15 +34,12 @@ let VueCompiler = (function () {
 		}
 	};
 
-	Vue.migrateOptions = function (options) {
-		return typeof (options.data) == 'function'
-			? options
-			: Object.assign({}, options, { data: function () { return options.data; } });
-	};
+//	if (Vue.component)						// v2
+//		Vue.import = importComponents;
+//	else									// v3
+//		Vue.prototype.import = importComponents;
 
 	return {
-		app: null,
-
 		regexp: {
 			name: regexp('[^\\d\\w-]', 'g'),
 			slot: regexp('_t\\("([^"]+?)"\\)', 'g'),
@@ -78,31 +75,32 @@ let VueCompiler = (function () {
 			return fn;
 		},
 
-		import: function (components, mixins) {
-			if (typeof (components) == 'string')
-				components = [components];
+	import: function (components, mixins) {
+		if (typeof (components) == 'string')
+			components = [components];
 
-			if (Array.isArray(components))
-				components = components.reduce(function (prev, curr) {
-					let name = curr
-						.split('/')
-						.slice(-1)[0]
-						.split('.')
-						.slice(0, -1)
-						.map(function (el) {
-							return el.replace(VueCompiler.regexp.name, '-');
-						})
-						.join('-');
-					prev[name] = curr;
-					return prev;
-				}, {});
+		if (Array.isArray(components))
+			components = components.reduce(function (prev, curr) {
+				let name = curr
+					.split('/')
+					.slice(-1)[0]
+					.split('.')
+					.slice(0, -1)
+					.map(function (el) {
+						return el.replace(VueCompiler.regexp.name, '-');
+					})
+					.join('-');
+				prev[name] = curr;
+				return prev;
+			}, {});
 
+			let component = this.component;
 			Object.keys(components).forEach(function (name) {
 				let def = VueCompiler.download(components[name], mixins);
 
-				if (VueCompiler.app)
-//					VueCompiler.app.component(name, Vue.defineAsyncComponent(def));
-					VueCompiler.app.component(name, Vue.defineAsyncComponent(() => new Promise((resolve, reject) => {
+				if (!Vue.component)
+//					component(name, Vue.defineAsyncComponent(def));
+					component(name, Vue.defineAsyncComponent(() => new Promise((resolve, reject) => {
 						def
 							.then(function (def) {
 								resolve(def);
@@ -189,14 +187,15 @@ let VueCompiler = (function () {
 //										temp.template = template[2];
 										temp.functional = template[1].includes('functional');
 
-										if (VueCompiler.app) {
+										if (!Vue.component) {
 											temp.template = temp.functional
 												? template[2]
-													.replace('v-bind="data.attrs"', 'v-bind="$attrs"')
+//													.replace('v-bind="data.attrs"', 'v-bind="this.$attrs"')
 													.replace('v-on="listeners"', '')
+													.replace(/data\.attrs/g, 'this.$attrs')
+													.replace(/data\./g, 'this.$data.')
 													.replace(/props\./g, 'this.')
 													.replace(/slots\(\)/g, 'this.$slots')
-													.replace(/data\./g, 'this.$data.')
 												: template[2];
 										} else {
 											if (temp.functional) {
@@ -276,6 +275,32 @@ let VueCompiler = (function () {
 						});
 				});
 			}, Promise.resolve(text));
+		},
+
+		createApp(options, components) {
+			var app = null;
+
+			if (Vue.component) {
+				if (components)
+					this.import(components);
+
+				app = new Vue(options);
+			} else {
+				app = Vue.createApp(
+					typeof (options.data) == 'function'
+						? options
+						: Object.assign({}, options, { data: function () { return options.data; } })
+				);
+
+				app.import = this.import.bind(app);
+				if (components)
+					app.import(components);
+
+				if (options.el)
+					app.mount(options.el);
+			}
+
+			return app;
 		}
 	};
 }());
