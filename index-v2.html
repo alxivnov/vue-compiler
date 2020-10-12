@@ -16,7 +16,7 @@
 		<p class="mt-3">
 			Script that enables usage of Vue.js Single File Components directly in browser. <a href="https://github.com/alxivnov/vue-compiler/" class="link">GitHub</a>
 		</p>
-		<ul class="nav nav-tabs mt-3">
+		<ul class="nav nav-tabs my-3">
 			<li class="nav-item">
 				<a :class="{
 					'nav-link': true,
@@ -29,6 +29,12 @@
 					'active': page == 'page-card'
 				}" href="#" @click.prevent="page = 'page-card'">Card</a>
 			</li>
+			<li class="nav-item">
+				<a :class="{
+					'nav-link': true,
+					'active': page == 'page-junk'
+				}" href="#" @click.prevent="page = 'page-junk'">Junk</a>
+			</li>
 		</ul>
 
 		<component :is="page"></component>
@@ -38,8 +44,8 @@
 	<script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.0/dist/umd/popper.min.js" integrity="sha384-Q6E9RHvbIyZFJoft+2mJbHaEWldlvI9IOYy5n3zV9zzTtmI3UksdQRVvoxMfooAo" crossorigin="anonymous"></script>
 	<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.0/js/bootstrap.min.js" integrity="sha384-OgVRvuATP1z7JjHLkuOU7Xw704+h835Lr+6QL9UvYjZE3Ipu6Tp75j7Bh/kR0JKI" crossorigin="anonymous"></script>
 
-	<!-- <script src="https://cdn.jsdelivr.net/npm/vue"></script> -->
-	<script src="https://unpkg.com/vue@next"></script>
+	<script src="https://cdn.jsdelivr.net/npm/vue"></script>
+	<!-- <script src="https://unpkg.com/vue@next"></script> -->
 
 	<script src="./vue-compiler.js"></script>
 
@@ -58,15 +64,10 @@
 			'form-select.vue',
 			'form-textarea.vue',
 
-			'card.vue',
-			'card-body.vue',
-			'card-img.vue',
-			'card-link.vue',
-			'list-group.vue',
-			'list-group-item.vue',
-
 			'page-code.vue',
-			'page-card.vue'
+			'page-card.vue',
+
+			'/junk/page-junk.vue'
 		];
 
 		let opts = {
@@ -78,7 +79,7 @@
 			}
 		};
 
-		VueCompiler.createApp(opts, comp);
+		VueCompiler.createApp(opts, comp, { cache: true, async: /\.vue$|(?:^|\/)vue\//g });
 	</script>
 </body>
 </html>

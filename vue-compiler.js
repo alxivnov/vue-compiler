@@ -48,7 +48,7 @@ let VueCompiler = (function () {
 			script: regexp('<script[^>]*>(.*?)(?:export\\s+default|module.exports\\s+=)\\s+(.*)<\/script>', 'gs'),
 			export: regexp('(.*?)(?:export\\s+default|module.exports\\s+=)\\s+(.*)', 'gms'),
 			import: regexp('(?:^)\\s*import(?:\\s+([^\'"`].*?)\\s+from\\s+|\\s+)(?:\'|"|`)(.*?)(?:\'|"|`);?', 'gms'),//|\\r\\n
-			absolute: regexp('\\bimport\\(([^())]+)\\)', 'g'),
+			absolute: regexp('(\\(.*\\).*\\=\\>.*)import\\(([^())]+)\\)', 'g'),//regexp('\\bimport\\(([^())]+)\\)', 'g'),
 
 			scopedSlot: regexp('_t\\("([^"]+?)",(.*),(.*?)\\)', 'g')
 		},
@@ -96,22 +96,22 @@ let VueCompiler = (function () {
 
 			let component = this.component;
 			Object.keys(components).forEach(function (name) {
+
+			/*
+const test = Vue.defineAsyncComponent(() => new Promise((resolve, reject) => {
+	resolve({
+		template: '<h1>TEST</h1>'
+	});
+}));
+			*/
+
 				let def = VueCompiler.download(components[name], mixins);
 
-				if (!Vue.component)
-//					component(name, Vue.defineAsyncComponent(def));
-					component(name, Vue.defineAsyncComponent(() => new Promise((resolve, reject) => {
-						def
-							.then(function (def) {
-								resolve(def);
-							})
-							.catch(function (err) {
-								reject(err);
-							});
-					})));
-				else
+				if (Vue.defineAsyncComponent)
+					component(name, Vue.defineAsyncComponent(function () { return def; }));
+				else if (Vue.component)
 					Vue.component(name, function (resolve, reject) {
-						return def
+						def
 							.then(function (def) {
 								resolve(def);
 							})
@@ -138,11 +138,24 @@ let VueCompiler = (function () {
 			}, Promise.resolve(context));
 		},
 
+		settings: {},
+		cache: {},
+
 		download: function (url, mixins) {
+			let absoluteURL = VueCompiler.absolute(url, document.baseURI);
+
+//			console.log('download', absoluteURL);
+			if (VueCompiler.settings.cache && VueCompiler.cache[absoluteURL])
+				return new Promise(function (resolve, reject) {
+//					console.log('cache', absoluteURL);
+
+					resolve(VueCompiler.cache[absoluteURL].temp);
+				});
+
 			return fetch(url)
 				.then(function (res) { return res.ok ? res.text() : null })
 				.then(function (text) {
-					return VueCompiler.assemble(text).then(function (text) {
+					return VueCompiler.assemble(text, absoluteURL).then(function (text) {
 						var template = VueCompiler.regexp.template.find(text, true);
 						var script = VueCompiler.regexp.script.find(text, true);
 						//
@@ -159,16 +172,40 @@ let VueCompiler = (function () {
 							return json === undefined ? text ? { template: '<span>' + text + '</span>' } : null : json;//text;
 						}
 
-						let absoluteURL = VueCompiler.absolute(url, document.baseURI);
-
 						let imps = hasScript ? VueCompiler.regexp.import.findAll(script[1], true) : [];
-						let ctx = { defs: {}, mixins };
+
+						let asyncImps = [];
+						let syncImps = [];
+						imps.forEach(function (imp) {
+							if (VueCompiler.settings.async && imp[2].search(VueCompiler.settings.async) > -1)
+								asyncImps.push(imp);
+							else
+								syncImps.push(imp);
+						});
+
+						let ctx = { defs: {}, mixins, ver: Vue.component ? 2 : Vue.defineAsyncComponent ? 3 : 0 };
 						if (hasScript) {
-							ctx.init = script[1].replace(VueCompiler.regexp.absolute, 'VueCompiler.download(VueCompiler.absolute($1, "' + absoluteURL + '"), context.mixins)');
-							ctx.main = script[2].replace(VueCompiler.regexp.absolute, 'VueCompiler.download(VueCompiler.absolute($1, "' + absoluteURL + '"), context.mixins)');
+							var replaceValue = 'VueCompiler.download(VueCompiler.absolute($2, \'' + absoluteURL + '\'), context.mixins)';
+
+							if (ctx.ver == 3)
+								replaceValue = 'Vue.defineAsyncComponent(function () { return ' + replaceValue + '; })';
+							else
+								replaceValue = '$1' + replaceValue;
+
+							ctx.init = script[1].replace(VueCompiler.regexp.absolute, replaceValue);
+							ctx.main = script[2].replace(VueCompiler.regexp.absolute, replaceValue);
+
+							asyncImps.forEach(function (imp) {
+								let asyncURL = VueCompiler.absolute(imp[2], absoluteURL);
+								var asyncReplace = 'function () { return VueCompiler.download(\'' + asyncURL + '\', context.mixins); }';
+								if (ctx.ver == 3)
+									asyncReplace = 'Vue.defineAsyncComponent(' + asyncReplace + ')';
+
+								ctx.init = ctx.init.replace(imp[0], 'const ' + imp[1] + ' = ' + asyncReplace + ';');
+							});
 						}
 						//
-//						console.log('imps', imps);
+//						console.log('imps', absoluteURL, imps, ctx.init);
 						let last = function (context) {
 							return new Promise(function (resolve, reject) {
 								//
@@ -187,7 +224,7 @@ let VueCompiler = (function () {
 //										temp.template = template[2];
 										temp.functional = template[1].includes('functional');
 
-										if (!Vue.component) {
+										if (context.ver == 3) {
 											temp.template = temp.functional
 												? template[2]
 //													.replace('v-bind="data.attrs"', 'v-bind="this.$attrs"')
@@ -217,6 +254,15 @@ let VueCompiler = (function () {
 										temp.mixins = context.mixins;
 									}
 
+									if (VueCompiler.settings.cache) {
+										VueCompiler.cache[absoluteURL] = {
+											temp: temp,
+											time: new Date()
+										};
+
+//										console.log('cached', absoluteURL);
+									}
+
 									resolve(temp);
 								} catch (err) {
 									err.name = name;
@@ -228,7 +274,7 @@ let VueCompiler = (function () {
 								}
 							});
 						};
-						let promises = imps.filter(function (imp) {
+						let promises = syncImps.filter(function (imp) {
 							return imp.length > 2;
 						}).map(function (imp) {
 							return function (context) {
@@ -247,7 +293,7 @@ let VueCompiler = (function () {
 											})
 											.join('');
 										//
-//										console.log('def', imp, name);
+//										console.log('def', imp, name, def);
 										def = 'let ' + name + ' = context.defs[\'' + impURL + '\'];';
 									}
 
@@ -263,12 +309,16 @@ let VueCompiler = (function () {
 				});
 		},
 
-		assemble: function (text) {
+		assemble: function (text, base) {
 			let srcs = VueCompiler.regexp.src.findAll(text, true);
 
 			return srcs.reduce(function (promise, src) {
 				return promise.then(function (text) {
-					return fetch(src[2])
+					let url = base
+						? VueCompiler.absolute(src[2], base)
+						: src[2];
+//					console.log('assemble', base, url, text);
+					return fetch(url)
 						.then(function (res) { return res.ok ? res.text() : null; })
 						.then(function (cont) {
 							return text.replace(src[0], '<' + src[1] + '>\r\n' + (cont || '') + '\r\n</' + src[1] + '>');
@@ -277,15 +327,17 @@ let VueCompiler = (function () {
 			}, Promise.resolve(text));
 		},
 
-		createApp(options, components) {
+		createApp(options, components, settings) {
+			Object.assign(this.settings, settings);
+
 			var app = null;
 
 			if (Vue.component) {
 				if (components)
-					this.import(components);
+					this.import(components, settings.mixin);
 
 				app = new Vue(options);
-			} else {
+			} else if (Vue.defineAsyncComponent) {
 				app = Vue.createApp(
 					typeof (options.data) == 'function'
 						? options
@@ -294,7 +346,7 @@ let VueCompiler = (function () {
 
 				app.import = this.import.bind(app);
 				if (components)
-					app.import(components);
+					app.import(components, settings.mixin);
 
 				if (options.el)
 					app.mount(options.el);

@@ -1,5 +1,5 @@
 <template>
-	<div class="my-3">
+	<div>
 		<a href="https://github.com/alxivnov/vue-compiler/blob/master/page-code.vue" class="link">Source</a>
 
 		<pre class="bg-light border rounded mt-3">

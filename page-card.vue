@@ -1,5 +1,5 @@
 <template>
-	<div class="my-3">
+	<div>
 		<a href="https://github.com/alxivnov/vue-compiler/blob/master/page-card.vue" class="link">Source</a>
 
 		<div class="row-X card-columns mt-3">
@@ -228,7 +228,22 @@
 </template>
 
 <script>
+import card from './card.vue';
+import cardBody from './card-body.vue';
+import cardImg from './card-img.vue';
+import cardLink from './card-link.vue';
+import listGroup from './list-group.vue';
+import listGroupItem from './list-group-item.vue';
+
 export default {
+	components: {
+		'card': card,
+		'card-body': cardBody,
+		'card-img': cardImg,
+		'card-link': cardLink,
+		'list-group': listGroup,
+		'list-group-item': listGroupItem
+	},
 	data() {
 		return {
 			button: 'Go somewhere',

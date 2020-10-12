@@ -48,6 +48,8 @@
 					: null
 			]"
 		>
+			<slot name="options">
+			</slot>
 			<slot name="option" v-for="(option, i) in props.options" :option="option">
 				<option :key="i">
 					{{ option }}

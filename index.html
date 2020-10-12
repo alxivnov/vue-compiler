@@ -16,7 +16,7 @@
 		<p class="mt-3">
 			Script that enables usage of Vue.js Single File Components directly in browser. <a href="https://github.com/alxivnov/vue-compiler/" class="link">GitHub</a>
 		</p>
-		<ul class="nav nav-tabs mt-3">
+		<ul class="nav nav-tabs my-3">
 			<li class="nav-item">
 				<a :class="{
 					'nav-link': true,
@@ -28,6 +28,12 @@
 					'nav-link': true,
 					'active': page == 'page-card'
 				}" href="#" @click.prevent="page = 'page-card'">Card</a>
+			</li>
+			<li class="nav-item">
+				<a :class="{
+					'nav-link': true,
+					'active': page == 'page-junk'
+				}" href="#" @click.prevent="page = 'page-junk'">Junk</a>
 			</li>
 		</ul>
 
@@ -58,15 +64,10 @@
 			'form-select.vue',
 			'form-textarea.vue',
 
-			'card.vue',
-			'card-body.vue',
-			'card-img.vue',
-			'card-link.vue',
-			'list-group.vue',
-			'list-group-item.vue',
-
 			'page-code.vue',
-			'page-card.vue'
+			'page-card.vue',
+
+			'/junk/page-junk.vue'
 		];
 
 		let opts = {
@@ -76,7 +77,7 @@
 			}
 		};
 
-		VueCompiler.createApp(opts, comp);
+		VueCompiler.createApp(opts, comp, { cache: true, async: /\.vue$|(?:^|\/)vue\//g });
 	</script>
 </body>
 </html>
