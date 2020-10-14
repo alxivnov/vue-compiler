@@ -228,7 +228,7 @@ const test = Vue.defineAsyncComponent(() => new Promise((resolve, reject) => {
 											temp.template = temp.functional
 												? template[2]
 //													.replace('v-bind="data.attrs"', 'v-bind="this.$attrs"')
-													.replace('v-on="listeners"', '')
+													.replace('listeners', '{}')
 													.replace(/data\.attrs/g, 'this.$attrs')
 													.replace(/data\./g, 'this.$data.')
 													.replace(/props\./g, 'this.')

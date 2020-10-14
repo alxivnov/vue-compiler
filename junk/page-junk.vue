@@ -34,6 +34,12 @@
 			<span>{{ vSelect }}</span>
 		</tr>
 		<tr>
+			<form-check v-model="vCheck">
+				form-check:
+			</form-check>
+			<span>{{ vCheck }}</span>
+		</tr>
+		<tr>
 			{{ expDef.text }}
 		</tr>
 		<tr>

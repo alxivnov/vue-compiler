@@ -42,6 +42,7 @@ export default {
 		return {
 			vInput: 'Some',
 			vSelect: '3rd',
+			vCheck: true,
 
 //			jsText: text,
 //			jsFunc: func(),

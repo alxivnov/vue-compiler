@@ -21,8 +21,18 @@
 		</label>
 
 		<textarea
-			v-bind="data.attrs"
-			
+			v-bind="{
+				...data.attrs,
+
+//				Vue 3
+				...(data.attrs && data.attrs.modelValue !== undefined
+					? {
+						value: data.attrs.modelValue,
+						onChange: $event => $emit('update:modelValue', $event.target.value)
+					}
+					: {})
+			}"
+
 			v-on="{
 				...listeners,
 				...(data.model
@@ -37,7 +47,7 @@
 				props.row !== undefined
 					? 'col'
 					: null,
-				
+
 				data.attrs && data.attrs['is-invalid']
 					? 'is-invalid'
 					: null
@@ -58,7 +68,7 @@
 <script>
 export default {
 	inheritAttrs: false,
-	
+
 	props: [
 		'col',	// auto|...
 		'row',	// true|FALSE

@@ -25,7 +25,21 @@
 */
 		]">
 			<input
-				v-bind="data.attrs"
+				v-bind="{
+					...data.attrs,
+
+//				Vue 3
+				...(data.attrs
+					? data.attrs.modelValue !== undefined
+						? {
+							checked: data.attrs.modelValue,
+							onChange: $event => $emit('update:modelValue', $event.target.checked)
+						}
+						: {
+							checked: data.attrs.value
+						}
+					: {})
+				}"
 
 				v-on="{
 					...listeners,
@@ -33,9 +47,8 @@
 						? { input: $event => (Array.isArray(listeners.input) ? listeners.input : [ listeners.input ]).forEach(el => el($event.target.checked)) }
 						: {})
 				}"
-				:id="data.attrs && (data.attrs.id || data.attrs.name) || data.model && data.model.expression"
-				:name="data.attrs && (data.attrs.name || data.attrs.id) || data.model && data.model.expression"
-				:checked="data.attrs && data.attrs.value"
+				:id="data.attrs && (data.attrs.id || data.attrs.name) || data.model && data.model.expression || 'check'"
+				:name="data.attrs && (data.attrs.name || data.attrs.id) || data.model && data.model.expression || 'check'"
 
 				:class="{
 //					'form-check-input': true,
@@ -46,7 +59,7 @@
 				:type="data.attrs && data.attrs.type || 'checkbox'"
 			>
 
-			<label :for="data.attrs && data.attrs.id || data.model && data.model.expression" v-show="slots().default" class="custom-control-label"><!--class="form-check-label"-->
+			<label :for="data.attrs && (data.attrs.id || data.attrs.name) || data.model && data.model.expression || 'check'" v-show="slots().default" class="custom-control-label"><!--class="form-check-label"-->
 				<slot></slot>
 			</label>
 		</div>

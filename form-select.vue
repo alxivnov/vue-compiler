@@ -21,7 +21,17 @@
 		</label>
 
 		<select
-			v-bind="data.attrs"
+			v-bind="{
+				...data.attrs,
+
+//				Vue 3
+				...(data.attrs && data.attrs.modelValue !== undefined
+					? {
+						value: data.attrs.modelValue,
+						onChange: $event => $emit('update:modelValue', $event.target.value)
+					}
+					: {})
+			}"
 
 			v-on="{
 				...listeners,
