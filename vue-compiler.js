@@ -334,7 +334,7 @@ const test = Vue.defineAsyncComponent(() => new Promise((resolve, reject) => {
 
 			if (Vue.component) {
 				if (components)
-					this.import(components, settings.mixin);
+					this.import(components, settings && settings.mixin);
 
 				app = new Vue(options);
 			} else if (Vue.defineAsyncComponent) {
@@ -346,7 +346,7 @@ const test = Vue.defineAsyncComponent(() => new Promise((resolve, reject) => {
 
 				app.import = this.import.bind(app);
 				if (components)
-					app.import(components, settings.mixin);
+					app.import(components, settings && settings.mixin);
 
 				if (options.el)
 					app.mount(options.el);
