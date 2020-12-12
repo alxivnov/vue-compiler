@@ -75,6 +75,8 @@ let VueCompiler = (function () {
 			return fn;
 		},
 
+		global: {},
+
 	import: function (components, mixins) {
 		if (typeof (components) == 'string')
 			components = [components];
@@ -105,19 +107,30 @@ const test = Vue.defineAsyncComponent(() => new Promise((resolve, reject) => {
 }));
 			*/
 
+				let url = VueCompiler.absolute(components[name], document.baseURI);
 				let def = VueCompiler.download(components[name], mixins);
+				if (name.startsWith('Base'))
+					def.then(function (def) {
+						VueCompiler.global[url] = def;
+					}).catch(function (err) {
+						delete VueCompiler.global[url];
+					});
 
 				if (Vue.defineAsyncComponent)
 					component(name, Vue.defineAsyncComponent(function () { return def; }));
 				else if (Vue.component)
 					Vue.component(name, function (resolve, reject) {
-						def
-							.then(function (def) {
-								resolve(def);
-							})
-							.catch(function (err) {
-								reject(err);
-							});
+						let val = VueCompiler.global[url];
+						if (val)
+							resolve(val);
+						else
+							def
+								.then(function (def) {
+									resolve(def);
+								})
+								.catch(function (err) {
+									reject(err);
+								});
 					});
 			});
 		},
@@ -200,6 +213,7 @@ const test = Vue.defineAsyncComponent(() => new Promise((resolve, reject) => {
 								var asyncReplace = 'function () { return VueCompiler.download(\'' + asyncURL + '\', context.mixins); }';
 								if (ctx.ver == 3)
 									asyncReplace = 'Vue.defineAsyncComponent(' + asyncReplace + ')';
+								asyncReplace = 'VueCompiler.global[\'' + asyncURL + '\'] || ' + asyncReplace;
 
 								ctx.init = ctx.init.replace(imp[0], 'const ' + imp[1] + ' = ' + asyncReplace + ';');
 							});
