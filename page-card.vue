@@ -90,6 +90,8 @@
 							data-toggle="tab"
 							:href="'#tabpanel-' + i"
 
+							data-bs-toggle="tab"
+
 							role="tab"
 							:id="'tab-' + i"
 							:aria-controls="'tabpanel-' + i"
@@ -124,6 +126,8 @@
 							:class="['nav-item', 'nav-link', i == 1 && 'active']"
 							data-toggle="pill"
 							:href="'#pillpanel-' + i"
+
+							data-bs-toggle="pill"
 
 							role="tab"
 							:id="'pill-' + i"

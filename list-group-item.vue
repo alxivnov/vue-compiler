@@ -16,6 +16,8 @@
 		]"
 		:data-toggle="props.toggle"
 
+		:data-bs-toggle="props.toggle"
+
 		v-bind="data.attrs"
 		v-on="listeners"
 	>

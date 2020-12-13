@@ -40,11 +40,17 @@
 				'dropdown-toggle-split': slots().dropdown && !props.fas && !slots().default
 			}"
 
-			:data-toggle="slots().dropdown ? 'dropdown' : props.popoverTitle || props.popoverContent ? 'popover' : null" aria-haspopup="true" aria-expanded="false"
+			:data-toggle="slots().dropdown ? 'dropdown' : props.popoverTitle || props.popoverContent ? 'popover' : null"
+			aria-haspopup="true"
+			aria-expanded="false"
 
 			:title="props.popoverTitle"
 			:data-content="props.popoverContent"
 			:data-placement="props.popoverPlacement"
+
+			:data-bs-toggle="slots().dropdown ? 'dropdown' : props.popoverTitle || props.popoverContent ? 'popover' : null"
+			:data-bs-content="props.popoverContent"
+			:data-bs-placement="props.popoverPlacement"
 		>
 			<span
 				:v-show="props.fas"
