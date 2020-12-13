@@ -5,7 +5,10 @@
 		<pre class="bg-light border rounded mt-3">
 			<code :class="{
 				'font-weight-bold': font == 1,
-				'font-italic': font == 2
+				'font-italic': font == 2,
+
+				'fw-bold': font == 1,
+				'fst-italic': font == 2
 			}">
 				&lt;script src="./vue-compiler.js">&lt;/script>
 
