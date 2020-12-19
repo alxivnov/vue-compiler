@@ -16,7 +16,18 @@
 			<slot name="brand"></slot>
 		</a>
 
-		<button class="navbar-toggler" type="button" data-toggle="collapse" :data-target="'#' + (data.attrs && data.attrs.id || 'navbar') + '-collapse'" :aria-controls="(data.attrs && data.attrs.id || 'navbar') + '-collapse'" aria-expanded="false" aria-label="Toggle navigation">
+		<button
+			class="navbar-toggler"
+			type="button"
+			data-toggle="collapse"
+			:data-target="'#' + (data.attrs && data.attrs.id || 'navbar') + '-collapse'"
+			:aria-controls="(data.attrs && data.attrs.id || 'navbar') + '-collapse'"
+			aria-expanded="false"
+			aria-label="Toggle navigation"
+
+			data-bs-toggle="collapse"
+			:data-bs-target="'#' + (data.attrs && data.attrs.id || 'navbar') + '-collapse'"
+		>
 			<span class="navbar-toggler-icon"></span>
 		</button>
 		<div class="collapse navbar-collapse" :id="(data.attrs && data.attrs.id || 'navbar') + '-collapse'">

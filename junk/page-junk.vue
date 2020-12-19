@@ -2,6 +2,14 @@
 	<table>
 		<tr>
 			<btn @click.prevent="click">btn</btn>
+
+			<modal id="modal" title="Modal" scrollable centered fade @shown="shown" @hidden="hidden">
+				<span>{{ vModal }}</span>
+
+				<template #footer>
+					<btn btn-style="secondary" data-dismiss="modal" data-bs-dismiss="modal">Close</btn>
+				</template>
+			</modal>
 		</tr>
 		<tr>
 			<test />
@@ -35,9 +43,24 @@
 		</tr>
 		<tr>
 			<form-check v-model="vCheck">
-				form-check:
+				form-check
 			</form-check>
 			<span>{{ vCheck }}</span>
+		</tr>
+		<tr>
+			<form-check id="1st-radio" type="radio" value="1st" html-value="1st" v-model="vRadio">
+				form-check 1
+			</form-check>
+			<form-check id="2nd-radio" type="radio" value="2nd" html-value="2nd" v-model="vRadio">
+				form-check 2
+			</form-check>
+			<span>{{ vRadio }}</span>
+		</tr>
+		<tr>
+			<form-input type="file" @change="file">
+				{{ 'Select file' }}
+			</form-input>
+			<span>{{ vFile }}</span>
 		</tr>
 		<tr>
 			{{ expDef.text }}

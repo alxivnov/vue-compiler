@@ -31,8 +31,15 @@
 				<div class="modal-content">
 					<div class="modal-header">
 						<h5 class="modal-title" :id="($attrs.id || 'modal') + '-label'">{{ title }}</h5>
-						<button type="button" class="close" data-dismiss="modal" aria-label="Close">
-							<!--<span aria-hidden="true">-->&times;<!--</span>-->
+						<button
+							type="button"
+							class="close btn-close"
+							data-dismiss="modal"
+							aria-label="Close"
+
+							data-bs-dismiss="modal"
+						>
+							<span v-show="jQuery">&times;</span>
 						</button>
 					</div>
 					<div class="modal-body">
@@ -67,22 +74,43 @@ export default {
 
 		'show',					// FALSE|true
 	],
+	computed: {
+		jQuery() {
+			return !!window.jQuery;
+		}
+	},
 	mounted() {
-		let el = $('#' + (this.$attrs.id || 'modal'));
+		let id = this.$attrs.id || 'modal';
+		let el = this.jQuery
+			? $('#' + id)
+			: document.getElementById(id);
 
 		modalEvents.forEach(event => {
 			let attr = 'on' + event.slice(0, 1).toUpperCase() + event.slice(1);
 			let on = event + '.bs.modal';
 
-			if (this.$listeners ? this.$listeners[event] : this.$attrs[attr])
-				el.on(on, e => {
+			if (this.$listeners ? this.$listeners[event] : this.$attrs[attr]) {
+				let listener = e => {
 //					console.log(on);
 
 					this.$emit(event, e);
-				});
+				};
+				if (this.jQuery)
+					el.on(on, listener);
+				else
+					el.addEventListener(on, listener);
+			}
 		});
 
-		el.modal(this.$props.show !== undefined ? 'show' : 'hide');
+		if (this.jQuery) {
+			el.modal(this.$props.show !== undefined ? 'show' : 'hide');
+		} else {
+			let modal = bootstrap.Modal.getInstance(el) || new bootstrap.Modal(el);
+			if (this.$props.show !== undefined)
+				modal.show();
+			else
+				modal.hide();
+		}
 	}
 }
 </script>
