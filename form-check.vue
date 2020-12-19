@@ -5,10 +5,11 @@
 			: 'col'
 		: null">
 		<div :class="[
-/*
-			'form-check': true,
-			'form-check-inline': props.inline,
-*/
+
+			'form-check',
+			props.switch ? 'form-switch' : null,
+			props.inline ? 'form-check-inline' : null,
+
 			'custom-control',
 			props.type == 'radio'
 				? 'custom-radio'
@@ -32,11 +33,11 @@
 				...(data.attrs
 					? data.attrs.modelValue !== undefined
 						? {
-							checked: data.attrs.modelValue,
-							onChange: $event => $emit('update:modelValue', $event.target.checked)
+							checked: props.type == 'radio' ? (data.attrs.modelValue == (data.attrs.value || props.htmlValue)) : data.attrs.modelValue,
+							onChange: $event => $emit('update:modelValue', props.type == 'radio' ? (data.attrs.value || props.htmlValue) : $event.target.checked)
 						}
 						: {
-							checked: data.attrs.value
+							checked: props.type == 'radio' ? (data.model.value == props.htmlValue) : data.attrs.value
 						}
 					: {})
 				}"
@@ -44,22 +45,22 @@
 				v-on="{
 					...listeners,
 					...(data.model
-						? { input: $event => (Array.isArray(listeners.input) ? listeners.input : [ listeners.input ]).forEach(el => el($event.target.checked)) }
+						? { input: $event => (Array.isArray(listeners.input) ? listeners.input : [ listeners.input ]).forEach(el => el(props.type == 'radio' ? props.htmlValue : $event.target.checked)) }
 						: {})
 				}"
 				:id="data.attrs && (data.attrs.id || data.attrs.name) || data.model && data.model.expression || 'check'"
 				:name="data.attrs && (data.attrs.name || data.attrs.id) || data.model && data.model.expression || 'check'"
 
 				:class="{
-//					'form-check-input': true,
+					'form-check-input': true,
 					'custom-control-input': true,
 					'position-static': !slots().default
 				}"
 
-				:type="data.attrs && data.attrs.type || 'checkbox'"
+				:type="props.type || 'checkbox'"
 			>
 
-			<label :for="data.attrs && (data.attrs.id || data.attrs.name) || data.model && data.model.expression || 'check'" v-show="slots().default" class="custom-control-label"><!--class="form-check-label"-->
+			<label :for="data.attrs && (data.attrs.id || data.attrs.name) || data.model && data.model.expression || 'check'" v-show="slots().default" class="form-check-label custom-control-label">
 				<slot></slot>
 			</label>
 		</div>
@@ -71,6 +72,8 @@ export default {
 	inheritAttrs: false,
 
 	props: [
+		'html-value',
+
 		'type',		// CHECKBOX|radio
 
 		'col',		// auto|...

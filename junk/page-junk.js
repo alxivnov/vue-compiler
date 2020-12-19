@@ -23,10 +23,14 @@ const test = Vue.component
 
 import some from 'html.html';
 
+const Modal = () => import('../modal.vue');
+
 //console.log(func);
 
 export default {
 	components: {
+		'modal': Modal,
+
 		'form-input': FormInput,
 		'form-select': FormSelect,
 		'some': some,
@@ -43,6 +47,9 @@ export default {
 			vInput: 'Some',
 			vSelect: '3rd',
 			vCheck: true,
+			vRadio: '2nd',
+			vFile: null,
+			vModal: '',
 
 //			jsText: text,
 //			jsFunc: func(),
@@ -78,6 +85,27 @@ export default {
 	methods: {
 		click() {
 			console.log('Button clicked');
+
+			if (window.jQuery) {
+				$('#modal').modal('show');
+			} else {
+				let el = document.getElementById('modal');
+				let modal = bootstrap.Modal.getInstance(el) || new bootstrap.Modal(el);
+				modal.show();
+			}
+		},
+		shown() {
+			this.vModal += ' shown';
+
+			console.log('shown');
+		},
+		hidden() {
+			this.vModal += ' hidden';
+
+			console.log('hidden');
+		},
+		file($event) {
+			this.vFile = $event.target.files.length && $event.target.files[0].name;
 		}
 	}
 }

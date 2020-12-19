@@ -1,6 +1,7 @@
 <template functional>
 	<div :class="[
-		'form-group',
+//		'form-group',
+		'mb-3',
 		props.row !== undefined
 			? 'row'
 			: props.col !== undefined
@@ -10,7 +11,7 @@
 		<label :class="[
 			props.row !== undefined
 				? 'col-form-label' + (props.size ? '-' + props.size : '')
-				: null,
+				: 'form-label',
 			props.row !== undefined
 				? 'col-' + props.row
 				: null

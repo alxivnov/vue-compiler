@@ -2,7 +2,8 @@
 	<div :class="[
 		data.attrs && data.attrs.type == 'file'
 			? 'custom-file'
-			: 'form-group',
+//			: 'form-group',
+			: 'mb-3',
 		props.row !== undefined
 			? 'row'
 			: props.col !== undefined
@@ -12,7 +13,7 @@
 		<label :class="[
 			props.row !== undefined
 				? 'col-form-label' + (props.size ? '-' + props.size : '')
-				: null,
+				: 'form-label',
 			props.row !== undefined
 				? 'col-' + props.row
 				: null,
@@ -51,7 +52,7 @@
 			:class="[
 				data.attrs && data.attrs.type == 'file'
 //					? 'form-control-file'
-					? 'custom-file-input'
+					? 'custom-file-input form-control'
 					: data.attrs && data.attrs.type == 'range'
 //						? 'form-control-range'
 						? 'custom-range'
