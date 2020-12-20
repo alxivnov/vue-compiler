@@ -59,7 +59,7 @@
 					['fa-' + props.fas]: props.fas,
 					'fa-fw': true,
 
-					'mr-1': props.fas && slots().default,
+					'mr-1 me-1': props.fas && slots().default,
 				}"
 			></span>
 			<slot>

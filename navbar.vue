@@ -8,6 +8,8 @@
 
 		[props.stick ? 'fixed-' + props.stick : 'sticky-top']: props.stick !== undefined,
 	}">
+		<div class="container-fluid">
+
 		<a
 			class="navbar-brand"
 			href="/"
@@ -31,17 +33,19 @@
 			<span class="navbar-toggler-icon"></span>
 		</button>
 		<div class="collapse navbar-collapse" :id="(data.attrs && data.attrs.id || 'navbar') + '-collapse'">
-			<div class="navbar-nav mr-auto">
+			<div class="navbar-nav mr-auto me-auto">
 				<slot></slot>
 			</div>
 
-			<form class="form-inline">
+			<form class="form-inline d-flex">
 				<slot name="form"></slot>
 			</form>
 
 			<span class="navbar-text">
 				<slot name="text"></slot>
 			</span>
+		</div>
+
 		</div>
 	</nav>
 </template>
