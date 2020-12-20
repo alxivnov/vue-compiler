@@ -39,7 +39,7 @@
 
 							data-bs-dismiss="modal"
 						>
-							<span v-show="jQuery">&times;</span>
+							<span v-show="!bs5">&times;</span>
 						</button>
 					</div>
 					<div class="modal-body">
@@ -75,15 +75,15 @@ export default {
 		'show',					// FALSE|true
 	],
 	computed: {
-		jQuery() {
-			return !!window.jQuery;
+		bs5() {
+			return !!bootstrap.Modal.getInstance;
 		}
 	},
 	mounted() {
 		let id = this.$attrs.id || 'modal';
-		let el = this.jQuery
-			? $('#' + id)
-			: document.getElementById(id);
+		let el = this.bs5
+			? document.getElementById(id)
+			: $('#' + id);
 
 		modalEvents.forEach(event => {
 			let attr = 'on' + event.slice(0, 1).toUpperCase() + event.slice(1);
@@ -95,21 +95,21 @@ export default {
 
 					this.$emit(event, e);
 				};
-				if (this.jQuery)
-					el.on(on, listener);
-				else
+				if (this.bs5)
 					el.addEventListener(on, listener);
+				else
+					el.on(on, listener);
 			}
 		});
 
-		if (this.jQuery) {
-			el.modal(this.$props.show !== undefined ? 'show' : 'hide');
-		} else {
+		if (this.bs5) {
 			let modal = bootstrap.Modal.getInstance(el) || new bootstrap.Modal(el);
 			if (this.$props.show !== undefined)
 				modal.show();
 			else
 				modal.hide();
+		} else {
+			el.modal(this.$props.show !== undefined ? 'show' : 'hide');
 		}
 	}
 }
