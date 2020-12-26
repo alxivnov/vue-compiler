@@ -2,49 +2,49 @@
 	<div>
 		<a href="https://github.com/alxivnov/vue-compiler/blob/master/page-card.vue" class="link">Source</a>
 
-		<div class="row-X card-columns mt-3">
-			<!-- <div class="col"> -->
+		<div id="grid" class="card-columns mt-3" :class="{ 'row': bs5 }">
+			<div :class="{ 'col-4 mb-3': bs5 }">
 				<card>
 					<card-img :src="image" place="top"></card-img>
 					<card-body :title="title" :text="text">
 						<btn>{{ button }}</btn>
 					</card-body>
 				</card>
-			<!-- </div>
-			<div class="col"> -->
+			</div>
+			<div :class="{ 'col-4 mb-3': bs5 }">
 				<card>
 					<card-body>
 						{{ body }}
 					</card-body>
 				</card>
-			<!-- </div>
-			<div class="col"> -->
+			</div>
+			<div :class="{ 'col-4 mb-3': bs5 }">
 				<card>
 					<card-body :title="title" :subtitle="subtitle" :text="text" :links="links"></card-body>
 				</card>
-			<!-- </div>
-			<div class="col"> -->
+			</div>
+			<div :class="{ 'col-4 mb-3': bs5 }">
 				<card-img :src="image" place="top"></card-img>
 				<card>
 					<card-body :text="text"></card-body>
 				</card>
-			<!-- </div>
-		</div>
-		<div class="row mt-3">
-			<div class="col"> -->
+			</div>
+		<!-- </div>
+		<div class="row mt-3"> -->
+			<div :class="{ 'col-4 mb-3': bs5 }">
 				<card>
 					<list-group :items="items" flush></list-group>
 				</card>
-			<!-- </div>
-			<div class="col"> -->
+			</div>
+			<div :class="{ 'col-4 mb-3': bs5 }">
 				<card border-color="primary" text-color="primary" header-bg-color="primary" header-border-color="primary" header-text-color="white">
 					<template #header>
 						{{ header }}
 					</template>
 					<list-group :items="items" flush></list-group>
 				</card>
-			<!-- </div>
-			<div class="col"> -->
+			</div>
+			<div :class="{ 'col-4 mb-3': bs5 }">
 				<card>
 					<card-img :src="image" place="top"></card-img>
 					<card-body :title="title" :text="text"></card-body>
@@ -53,8 +53,8 @@
 					</div>
 					<card-body :links="links"></card-body>
 				</card>
-			<!-- </div>
-			<div class="col"> -->
+			</div>
+			<div :class="{ 'col-4 mb-3': bs5 }">
 				<card>
 					<template #header>
 						{{ header }}
@@ -63,10 +63,10 @@
 						<btn>{{ button }}</btn>
 					</card-body>
 				</card>
-			<!-- </div>
-		</div>
-		<div class="row mt-3">
-			<div class="col text-center"> -->
+			</div>
+		<!-- </div>
+		<div class="row mt-3"> -->
+			<div :class="{ 'col-4 mb-3': bs5 }">
 				<card>
 					<template #header>
 						{{ header }}
@@ -78,8 +78,8 @@
 						{{ footer }}
 					</template>
 				</card>
-			<!-- </div>
-			<div class="col"> -->
+			</div>
+			<div :class="{ 'col-4 mb-3': bs5 }">
 				<card nav="tabs">
 					<template #header>
 						<a
@@ -115,8 +115,8 @@
 						</card-body>
 					</div>
 				</card>
-			<!-- </div>
-			<div class="col"> -->
+			</div>
+			<div :class="{ 'col-4 mb-3': bs5 }">
 				<card nav="pills">
 					<template #header>
 						<a
@@ -152,34 +152,35 @@
 						</card-body>
 					</div>
 				</card>
-			<!-- </div>
-			<div class="col"> -->
+			</div>
+			<div :class="{ 'col-4 mb-3': bs5 }">
 				<card>
 					<card-body :title="title" :text="text"></card-body>
 					<card-img :src="image" place="bottom"></card-img>
 				</card>
-			<!-- </div>
-		</div>
-		<div class="row mt-3">
-			<div class="col"> -->
+			</div>
+		<!-- </div>
+		<div class="row mt-3"> -->
+			<div :class="{ 'col-4 mb-3': bs5 }">
 				<card bg-color="dark" text-color="white">
 					<card-img :src="image"></card-img>
 					<card-body overlay :title="title" :text="text"></card-body>
 				</card>
-			<!-- </div>
-			<div class="col"> -->
+			</div>
+			<div :class="{ 'col-4 mb-3': bs5 }">
 				<card no-gutters>
 					<card-img col :src="v_image"></card-img>
 					<card-body col :title="title" :text="text"></card-body>
 				</card>
-			<!-- </div>
-			<div class="col">
 			</div>
-			<div class="col">
+			<!-- <div :class="col">
+			</div>
+			<div :class="col">
 			</div> -->
 		</div>
-		<div class="row mt-3">
-			<div class="col">
+
+		<!-- <div class="row mt-3">
+			<div :class="col"> -->
 				<div class="card-group">
 					<card v-for="i in [1, 2, 3, 4]" :key="i">
 						<card-body :title="title" :text="text"></card-body>
@@ -188,15 +189,35 @@
 						</template>
 					</card>
 				</div>
-			</div>
-		</div>
+			<!-- </div>
+		</div> -->
+
 		<div class="row mt-3">
 			<div class="col">
-				<div class="card-deck">
+				<div v-if="bs5" class="row row-cols-1 row-cols-md-5 g-4">
+					<div class="col" v-for="i in [1, 2, 3, 4, 5]" :key="i">
+						<card height="100">
+							<card-body :title="title" :text="text">
+								<div v-for="j in i" :key="j">
+									<small class="text-muted">String №'{{ j }}</small>
+								</div>
+							</card-body>
+							<!-- <template #footer>
+								Card №{{ i }}
+							</template> -->
+						</card>
+					</div>
+				</div>
+				<div v-else class="card-deck">
 					<card v-for="i in [1, 2, 3, 4, 5]" :key="i">
 						<card-body :title="title" :text="text">
-							<small class="text-muted">{{ 'Card №' + i }}</small>
+							<div v-for="j in i" :key="j">
+								<small class="text-muted">String №'{{ j }}</small>
+							</div>
 						</card-body>
+						<!-- <template #footer>
+							Card №{{ i }}
+						</template> -->
 					</card>
 				</div>
 			</div>
@@ -269,6 +290,19 @@ export default {
 			header: 'Featured',
 			footer: '2 days ago'
 		};
+	},
+	computed: {
+		bs5() {
+			return !!bootstrap.Modal.getInstance;
+		}
+	},
+	mounted() {
+		if (this.bs5)
+//			this.$nextTick(function () {
+			setTimeout(function () {
+				let el = document.querySelector('#grid');
+				let masonry = new Masonry(el, { percentPosition: true });
+			}, 1000);
 	}
 }
 </script>

@@ -1,7 +1,8 @@
 <template functional>
 	<div
 		:class="[
-			'card',
+			bs5 && (props.collapse || props.accordion !== undefined) ? 'accordion-item' : 'card',
+			props.height !== undefined && props.height !== false && 'h-' + props.height,
 			props.align !== undefined && props.align !== false && 'text-' + props.align,
 			props.textColor !== undefined && props.textColor !== false && 'text-' + props.textColor,
 			props.bgColor !== undefined && props.bgColor !== false && 'bg-' + props.bgColor,
@@ -11,7 +12,7 @@
 		<div
 			v-show="slots().header"
 			:class="[
-				'card-header',
+				bs5 && (props.collapse || props.accordion !== undefined) ? 'accordion-header' : 'card-header',
 				props.headerTextColor !== undefined && props.headerTextColor !== false && 'text-' + props.headerTextColor,
 				props.headerBgColor !== undefined && props.headerBgColor !== false && 'bg-' + props.headerBgColor,
 				props.headerBorderColor !== undefined && props.headerBorderColor !== false && 'border-' + props.headerBorderColor
@@ -21,6 +22,8 @@
 		>
 			<div
 				:class="[
+					bs5 && (props.collapse || props.accordion !== undefined) && 'accordion-button',
+
 					props.nav !== undefined && props.nav !== false && 'nav',
 					props.nav == 'tabs' && 'nav-tabs card-header-tabs',
 					props.nav == 'pills' && 'nav-pills card-header-pills',
@@ -47,7 +50,9 @@
 
 		<div
 			:class="[
-				props.noGutters !== undefined && props.noGutters !== false && 'row no-gutters',
+				bs5 && (props.collapse || props.accordion !== undefined) && 'accordion-collapse',
+
+				props.noGutters !== undefined && props.noGutters !== false && 'row no-gutters g-0',
 
 				props.collapse && 'collapse',
 				props.collapse && props.accordion !== undefined && !props.accordion && 'show',
@@ -93,7 +98,14 @@ export default {
 		'footer-border-color',	// primary|secondary|success|danger|warning|info|light|dark|white
 
 		'collapse',				// collpase id
-		'accordion'				// accordion id
-	]
+		'accordion',			// accordion id
+
+		'height',				// 25|50|75|100|auto
+	],
+	computed: {
+		bs5() {
+			return !!bootstrap.Modal.getInstance;
+		}
+	}
 }
 </script>
