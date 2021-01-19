@@ -3,7 +3,8 @@
 		data.attrs && data.attrs.type == 'file'
 			? 'custom-file'
 //			: 'form-group',
-			: 'mb-3',
+//			: 'mb-3',
+			: null,
 		props.row !== undefined
 			? 'row'
 			: props.col !== undefined

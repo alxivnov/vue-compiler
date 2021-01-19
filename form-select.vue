@@ -1,7 +1,7 @@
 <template functional>
 	<div :class="[
 //		'form-group',
-		'mb-3',
+//		'mb-3',
 		props.row !== undefined
 			? 'row'
 			: props.col !== undefined

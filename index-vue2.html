@@ -12,10 +12,14 @@
 </head>
 <body>
 	<div id="app" class="container-fluid">
-		<h1 class="mt-3 text-center">Client-Side Vue SFC Compiler</h1>
-		<p class="mt-3">
-			Script that enables usage of Vue.js Single File Components directly in browser. <a href="https://github.com/alxivnov/vue-compiler/" class="link">GitHub</a>
-		</p>
+		<navbar expand>
+			<template #brand>
+				Client-Side Vue SFC Compiler
+			</template>
+			<template #text>
+				Script that enables usage of Vue.js Single File Components directly in browser. <a href="https://github.com/alxivnov/vue-compiler/" class="link">GitHub</a>
+			</template>
+		</navbar>
 		<ul class="nav nav-tabs my-3">
 			<li class="nav-item">
 				<a :class="{
@@ -63,6 +67,7 @@
 			'form-row.vue',
 			'form-select.vue',
 			'form-textarea.vue',
+			'navbar.vue',
 
 			'page-code.vue',
 			'page-card.vue',
