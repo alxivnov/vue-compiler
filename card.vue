@@ -28,7 +28,7 @@
 					props.nav == 'tabs' && 'nav-tabs card-header-tabs',
 					props.nav == 'pills' && 'nav-pills card-header-pills',
 
-					props.collapse && props.accordion !== undefined && props.accordion && 'collapsed'
+					/*props.collapse && props.accordion !== undefined && props.accordion*/!props.show && 'collapsed'
 				]"
 
 				X-class="btn btn-link btn-block text-left"
@@ -39,7 +39,7 @@
 
 				:data-toggle="props.collapse && 'collapse'"
 				:data-target="props.collapse && '#' + props.collapse + '-collapse' + (props.accordion != null ? '-' + props.accordion : '')"
-				:aria-expanded="props.collapse && props.accordion !== undefined && !props.accordion"
+				:aria-expanded="/*props.collapse && props.accordion !== undefined && !props.accordion*/props.show"
 				:aria-controls="props.collapse && props.collapse + '-collapse' + (props.accordion != null ? '-' + props.accordion : '')"
 
 				:role="props.nav !== undefined && props.nav !== false ? 'tablist' : props.collapse ? 'button' : null"
@@ -55,7 +55,7 @@
 				props.noGutters !== undefined && props.noGutters !== false && 'row no-gutters g-0',
 
 				props.collapse && 'collapse',
-				props.collapse && props.accordion !== undefined && !props.accordion && 'show',
+				/*props.collapse && props.accordion !== undefined && !props.accordion*/props.show && 'show',
 
 				props.nav !== undefined && props.nav !== false && 'tab-content'
 			]"
@@ -99,6 +99,7 @@ export default {
 
 		'collapse',				// collpase id
 		'accordion',			// accordion id
+		'show',					// FALSE|true
 
 		'height',				// 25|50|75|100|auto
 	],
