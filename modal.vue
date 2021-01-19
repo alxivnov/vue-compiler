@@ -72,7 +72,7 @@ export default {
 		'fade',					// FALSE|true
 		'size',					// sm|UNDEFINED|lg|xl
 
-		'show',					// FALSE|true
+		'toggle',				// FALSE|true
 	],
 	computed: {
 		bs5() {
@@ -104,12 +104,12 @@ export default {
 
 		if (this.bs5) {
 			let modal = bootstrap.Modal.getInstance(el) || new bootstrap.Modal(el);
-			if (this.$props.show !== undefined)
+			if (this.$props.toggle != null)
 				modal.show();
 			else
 				modal.hide();
 		} else {
-			el.modal(this.$props.show !== undefined ? 'show' : 'hide');
+			el.modal(this.$props.toggle != null ? 'show' : 'hide');
 		}
 	}
 }
