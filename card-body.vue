@@ -1,5 +1,5 @@
 <template functional>
-	<div :class="props.col !== undefined && props.col !== false ? props.col.length ? ('col-' + props.col) : 'col' : null">
+	<!-- <div :class="props.col !== undefined && props.col !== false ? props.col.length ? ('col-' + props.col) : 'col' : null"> -->
 		<div :class="[
 			'card-body',
 			props.overlay !== undefined && props.overlay !== false && 'card-img-overlay'
@@ -10,7 +10,7 @@
 			<a v-for="(link, i) in props.links && Object.keys(props.links)" :key="i" :href="props.links[link]" class="card-link">{{ link }}</a>
 			<slot></slot>
 		</div>
-	</div>
+	<!-- </div> -->
 </template>
 
 <script>

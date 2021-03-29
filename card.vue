@@ -48,7 +48,10 @@
 			</div>
 		</div>
 
+		<slot></slot>
 		<div
+			v-show="slots().content"
+
 			:class="[
 				bs5 && (props.collapse || props.accordion !== undefined) && 'accordion-collapse',
 
@@ -66,7 +69,7 @@
 
 			:data-bs-parent="props.collapse && props.accordion != null && '#' + props.collapse || null"
 		>
-			<slot></slot>
+			<slot name="content"></slot>
 		</div>
 
 		<div v-show="slots().footer" :class="[

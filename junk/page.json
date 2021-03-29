@@ -1,0 +1,54 @@
+[
+	{
+		"urls": [
+			"https://alxivnov.github.io/vue-compiler/junk/page.html?content=https://alxivnov.github.io/vue-compiler/junk/page.json",
+			"https://alxivnov.github.io/vue-compiler/junk/page.html?content=page.json"
+		]
+	},
+	"Some text",
+	{
+		"content": "Some text"
+	},
+	{
+		"type": "text",
+		"content": "Some text"
+	},
+	[
+		{
+			"type": "text",
+			"content": "Some text"
+		}
+	],
+	{
+		"type": "image",
+		"content": "https://some.url"
+	},
+	{
+		"type": "gallery",
+		"content": [
+			{
+				"type": "link",
+				"url": "https://some.url",
+				"content": {
+					"type": "image",
+					"url": "https://some.url"
+				}
+			}
+		]
+	},
+	{
+		"type": "accordion",
+		"content": [
+			{
+				"type": "collapse",
+				"header": "Title",
+				"content": "Description"
+			}
+		]
+	},
+	{
+		"type": "button",
+		"content": "Click",
+		"url": "https://some.url"
+	}
+]

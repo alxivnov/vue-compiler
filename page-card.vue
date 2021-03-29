@@ -1,5 +1,5 @@
 <template>
-	<div>
+	<div class="my-3">
 		<a href="https://github.com/alxivnov/vue-compiler/blob/master/page-card.vue" class="link">Source</a>
 
 		<div id="grid" class="card-columns mt-3" :class="{ 'row': bs5 }">
@@ -100,20 +100,22 @@
 							{{ 'Tab ' + i }}
 						</a>
 					</template>
-					<div
-						v-for="i in [1, 2, 3]"
-						:key="i"
+					<template #content>
+						<div
+							v-for="i in [1, 2, 3]"
+							:key="i"
 
-						:class="['tab-pane', i == 1 && 'show', i == 1 && 'active']"
-						:id="'tabpanel-' + i"
+							:class="['tab-pane', i == 1 && 'show', i == 1 && 'active']"
+							:id="'tabpanel-' + i"
 
-						role="tabpanel"
-						:aria-labelledby="'tab-' + i"
-					>
-						<card-body :title="title + ' ' + i" :text="text">
-							<btn>{{ button }}</btn>
-						</card-body>
-					</div>
+							role="tabpanel"
+							:aria-labelledby="'tab-' + i"
+						>
+							<card-body :title="title + ' ' + i" :text="text">
+								<btn>{{ button }}</btn>
+							</card-body>
+						</div>
+					</template>
 				</card>
 			</div>
 			<div :class="{ 'col-4 mb-3': bs5 }">
@@ -137,20 +139,22 @@
 							{{ 'Pill ' + i }}
 						</a>
 					</template>
-					<div
-						v-for="i in [1, 2, 3]"
-						:key="i"
+					<template #content>
+						<div
+							v-for="i in [1, 2, 3]"
+							:key="i"
 
-						:class="['tab-pane', i == 1 && 'show', i == 1 && 'active']"
-						:id="'pillpanel-' + i"
+							:class="['tab-pane', i == 1 && 'show', i == 1 && 'active']"
+							:id="'pillpanel-' + i"
 
-						role="tabpanel"
-						:aria-labelledby="'pill-' + i"
-					>
-						<card-body :title="title + ' ' + i" :text="text">
-							<btn>{{ button }}</btn>
-						</card-body>
-					</div>
+							role="tabpanel"
+							:aria-labelledby="'pill-' + i"
+						>
+							<card-body :title="title + ' ' + i" :text="text">
+								<btn>{{ button }}</btn>
+							</card-body>
+						</div>
+					</template>
 				</card>
 			</div>
 			<div :class="{ 'col-4 mb-3': bs5 }">
@@ -169,8 +173,14 @@
 			</div>
 			<div :class="{ 'col-4 mb-3': bs5 }">
 				<card no-gutters>
-					<card-img col :src="v_image"></card-img>
-					<card-body col :title="title" :text="text"></card-body>
+					<template #content>
+						<div class="col">
+							<card-img col :src="v_image"></card-img>
+						</div>
+						<div class="col">
+							<card-body col :title="title" :text="text"></card-body>
+						</div>
+					</template>
 				</card>
 			</div>
 			<!-- <div :class="col">
@@ -183,7 +193,11 @@
 			<div :class="col"> -->
 				<div class="card-group">
 					<card v-for="i in [1, 2, 3, 4]" :key="i">
-						<card-body :title="title" :text="text"></card-body>
+						<card-body :title="title" :text="text">
+							<div class="card-text" v-for="j in i" :key="j">
+								<small class="text-muted">String №'{{ j }}</small>
+							</div>
+						</card-body>
 						<template #footer>
 							{{ 'Card №' + i }}
 						</template>
@@ -230,7 +244,9 @@
 							{{ header + ' №' + (i + 1) }}
 						<!-- </btn> -->
 					</template>
-					<card-body :title="title" :text="text"></card-body>
+					<template #content>
+						<card-body :title="title" :text="text"></card-body>
+					</template>
 				</card>
 			</div>
 			<div class="col">
@@ -240,7 +256,9 @@
 							{{ header }}
 						<!-- </btn> -->
 					</template>
-					<card-body :title="title" :text="text"></card-body>
+					<template #content>
+						<card-body :title="title" :text="text"></card-body>
+					</template>
 				</card>
 			</div>
 		</div>

@@ -27,6 +27,8 @@ const Modal = () => import('../modal.vue');
 
 //console.log(func);
 
+// php -S 127.0.0.1:5000
+
 export default {
 	components: {
 		'modal': Modal,
