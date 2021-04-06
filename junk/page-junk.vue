@@ -25,7 +25,7 @@
 			<span>{{ vInput }}</span>
 		</tr>
 		<tr>
-			<form-select v-model="vSelect" :options="[ '5th', '6th', '7th' ]">
+			<form-select v-model="vSelect" :options="{ '5th' : 'Fifth', '6th': 'Sixth', '7th': 'Seventh' }">
 				form-select:
 				<template #options>
 					<option>1st</option>
@@ -33,11 +33,11 @@
 					<option>3rd</option>
 					<option>4th</option>
 				</template>
-				<template #option="{ option }">
+				<!-- <template #option="{ option }">
 					<option :value="option">
 						{{ option }}
 					</option>
-				</template>
+				</template> -->
 			</form-select>
 			<span>{{ vSelect }}</span>
 		</tr>

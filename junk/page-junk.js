@@ -47,7 +47,7 @@ export default {
 	data() {
 		return {
 			vInput: 'Some',
-			vSelect: '3rd',
+			vSelect: '5th',
 			vCheck: true,
 			vRadio: '2nd',
 			vFile: null,
