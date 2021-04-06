@@ -238,19 +238,25 @@ const test = Vue.defineAsyncComponent(() => new Promise((resolve, reject) => {
 //										temp.template = template[2];
 										temp.functional = template[1].includes('functional');
 
+										let html = template[2];
 										if (context.ver == 3) {
 											temp.template = temp.functional
-												? template[2]
+												? html
 //													.replace('v-bind="data.attrs"', 'v-bind="this.$attrs"')
 													.replace('listeners', '{}')
 													.replace(/data\.attrs/g, 'this.$attrs')
 													.replace(/data\./g, 'this.$data.')
 													.replace(/props\./g, 'this.')
 													.replace(/slots\(\)/g, 'this.$slots')
-												: template[2];
+												: html;
 										} else {
 											if (temp.functional) {
-												let res = Vue.compile(template[2]);
+												if (temp.computed)
+													Object.keys(temp.computed).forEach(key => {
+														html = html.replace(regexp(key, 'gm'), '(' + temp.computed[key].toString() + ')()');
+													});
+
+												let res = Vue.compile(html);
 												let fn = VueCompiler.scopedSlot(res.render.toString()
 													.replace('anonymous(', '(_h, _vm')
 													.replace('with(this)', 'with(_vm)')
@@ -261,7 +267,7 @@ const test = Vue.defineAsyncComponent(() => new Promise((resolve, reject) => {
 												temp.staticRenderFns = res.staticRenderFns;
 //												delete temp.template;
 											} else {
-												temp.template = template[2];
+												temp.template = html;
 											}
 										}
 
