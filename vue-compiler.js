@@ -253,7 +253,8 @@ const test = Vue.defineAsyncComponent(() => new Promise((resolve, reject) => {
 											if (temp.functional) {
 												if (temp.computed)
 													Object.keys(temp.computed).forEach(key => {
-														html = html.replace(regexp(key, 'gm'), '(' + temp.computed[key].toString() + ')()');
+														let func = temp.computed[key].toString();
+														html = html.replace(regexp(key, 'gm'), (func.startsWith('function') ? '(' : '(function ') + func + ')()');
 													});
 
 												let res = Vue.compile(html);
