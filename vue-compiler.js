@@ -50,7 +50,7 @@ let VueCompiler = (function () {
 			import: regexp('(?:^)\\s*import(?:\\s+([^\'"`].*?)\\s+from\\s+|\\s+)(?:\'|"|`)(.*?)(?:\'|"|`);?', 'gms'),//|\\r\\n
 			absolute: regexp('(\\(.*\\).*\\=\\>.*)import\\(([^())]+)\\)', 'g'),//regexp('\\bimport\\(([^())]+)\\)', 'g'),
 
-			scopedSlot: regexp('_t\\("([^"]+?)",(.*),(.*?)\\)', 'g')
+			scopedSlot: regexp('_t\\("([^"]+?)",(.*)(,(.*?))?\\)', 'g')
 		},
 
 		scopedSlot: function (fn) {
