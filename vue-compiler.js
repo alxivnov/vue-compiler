@@ -50,7 +50,7 @@ let VueCompiler = (function () {
 			import: regexp('(?:^)\\s*import(?:\\s+([^\'"`].*?)\\s+from\\s+|\\s+)(?:\'|"|`)(.*?)(?:\'|"|`);?', 'gms'),//|\\r\\n
 			absolute: regexp('(\\(.*\\).*\\=\\>.*)import\\(([^())]+)\\)', 'g'),//regexp('\\bimport\\(([^())]+)\\)', 'g'),
 
-			scopedSlot: regexp('_t\\("([^"]+?)",(.*)(,(.*?))?\\)', 'g')
+			scopedSlot: regexp('_t\\("([^"]+?)",(.*)(?:,{(.*?)}\\)|([^}]\\)))', 'g')
 		},
 
 		scopedSlot: function (fn) {
@@ -68,7 +68,7 @@ let VueCompiler = (function () {
 				}
 
 				let prev = fn.substring(start, end);
-				let curr = prev.replace(VueCompiler.regexp.scopedSlot, '(scopedSlots["$1"] ? scopedSlots["$1"]($3) : $2)');
+				let curr = prev.replace(VueCompiler.regexp.scopedSlot, '(scopedSlots["$1"] ? scopedSlots["$1"]({$3}) : $2)');
 				fn = fn.replace(prev, curr);
 			}
 
