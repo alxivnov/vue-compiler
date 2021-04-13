@@ -45,12 +45,36 @@ let VueCompiler = (function () {
 			slot: regexp('_t\\("([^"]+?)"\\)', 'g'),
 			src: regexp('<(template|script)[ ]*src=(?:\'|"|`)([^\'"`]*)(?:\'|"|`).*>', 'gs'),
 			template: regexp('<template([^>]*)>(.*)<\/template>', 'gs'),
-			script: regexp('<script[^>]*>(.*?)(?:export\\s+default|module.exports\\s+=)\\s+(.*)<\/script>', 'gs'),
+			script: regexp('<script([^>]*)>(.*?)(?:export\\s+default|module.exports\\s+=)\\s+(.*)<\/script>', 'gs'),
 			export: regexp('(.*?)(?:export\\s+default|module.exports\\s+=)\\s+(.*)', 'gms'),
 			import: regexp('(?:^)\\s*import(?:\\s+([^\'"`].*?)\\s+from\\s+|\\s+)(?:\'|"|`)(.*?)(?:\'|"|`);?', 'gms'),//|\\r\\n
 			absolute: regexp('(\\(.*\\).*\\=\\>.*)import\\(([^())]+)\\)', 'g'),//regexp('\\bimport\\(([^())]+)\\)', 'g'),
 
-			scopedSlot: regexp('_t\\("([^"]+?)",(.*)(?:,{(.*?)}\\)|([^}]\\)))', 'g')
+			scopedSlot: regexp('_t\\("([^"]+?)",(.*)(?:,{(.*?)}\\)|([^}]\\)))', 'g'),
+
+			tsType: regexp('type\\s+(\\S+)\\s*=.*(?:;|$)', 'gm'),
+			tsInterface: regexp('interface\\s+(\\S+)\\s*{.*?}(?:;|$)', 'gms'),
+			tsGeneric: regexp('function\\s+\\S+<(\\S+)>\\s*', 'gm'),
+
+			metacharacters: regexp('([\\\\\\^\\$\\.\\|\\?\\*\\+\\(\\)\\[\\{]{1})', 'gm')
+		},
+
+		tsStripper(param) {
+			param = Array.isArray(param) ? param : [param];
+
+			let matches = param.flatMap(el => {
+				let t = VueCompiler.regexp.tsType.findAll(el);
+				let i = VueCompiler.regexp.tsInterface.findAll(el);
+				let g = VueCompiler.regexp.tsGeneric.findAll(el);
+
+				return t.concat(i).concat(g);
+			});
+
+			let pattern = ':\\s*(?:boolean|number|string|T)(\\[\\s*\\])?|\\s*as\\s+[\\w\\<\\>]+';
+			pattern = pattern.replace(/T/gm, matches.map(el => el[1]).join('|'));
+			pattern = pattern + '|' + matches.map(el => el[0].startsWith('function') ? '<' + el[1] + '>' : el[0].replace(VueCompiler.regexp.metacharacters, '\\$1')).join('|');
+			console.log('pattern', pattern);
+			return regexp(pattern, 'gm');
 		},
 
 		scopedSlot: function (fn) {
@@ -171,13 +195,26 @@ const test = Vue.defineAsyncComponent(() => new Promise((resolve, reject) => {
 					return VueCompiler.assemble(text, absoluteURL).then(function (text) {
 						var template = VueCompiler.regexp.template.find(text, true);
 						var script = VueCompiler.regexp.script.find(text, true);
+						script = !!script && script.length > 3 ? { attr: script[1], init: script[2], main: script[3] } : null;
 						//
 //						console.log('vue_component_definition', url, template, script);
-						if (!template && !script)
+						if (!template && !script) {
 							script = VueCompiler.regexp.export.find(text, true);
+							script = !!script && script.length > 2 ? { attr: '', init: script[1], main: script[2] } : null;
+						}
 
 						let hasTemplate = !!template && template.length > 2;
-						let hasScript = !!script && script.length > 2;
+						let hasScript = !!script;//!!script && script.length > 2;
+
+						if (!!script && script.attr.includes('lang="ts"')) {
+							let stripper = VueCompiler.tsStripper([script.init, script.main]);
+							script.init = script.init.replace(stripper, '');
+							script.main = script.main.replace(stripper, '');
+
+							let defineComponent = 'defineComponent';
+							if (script.main.startsWith(defineComponent))
+								script.main = script.main.substring(defineComponent.length);
+						}
 
 						if (!hasTemplate && !hasScript) {
 							let json = JSON.tryParse(text);
@@ -185,7 +222,7 @@ const test = Vue.defineAsyncComponent(() => new Promise((resolve, reject) => {
 							return json === undefined ? text ? { template: '<span>' + text + '</span>' } : null : json;//text;
 						}
 
-						let imps = hasScript ? VueCompiler.regexp.import.findAll(script[1], true) : [];
+						let imps = hasScript ? VueCompiler.regexp.import.findAll(script.init, true) : [];
 
 						let asyncImps = [];
 						let syncImps = [];
@@ -205,8 +242,8 @@ const test = Vue.defineAsyncComponent(() => new Promise((resolve, reject) => {
 							else
 								replaceValue = '$1' + replaceValue;
 
-							ctx.init = script[1].replace(VueCompiler.regexp.absolute, replaceValue);
-							ctx.main = script[2].replace(VueCompiler.regexp.absolute, replaceValue);
+							ctx.init = script.init.replace(VueCompiler.regexp.absolute, replaceValue);
+							ctx.main = script.main.replace(VueCompiler.regexp.absolute, replaceValue);
 
 							asyncImps.forEach(function (imp) {
 								let asyncURL = VueCompiler.absolute(imp[2], absoluteURL);
