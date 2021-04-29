@@ -50,7 +50,7 @@ let VueCompiler = (function () {
 			import: regexp('(?:^)\\s*import(?:\\s+([^\'"`].*?)\\s+from\\s+|\\s+)(?:\'|"|`)(.*?)(?:\'|"|`);?', 'gms'),//|\\r\\n
 			absolute: regexp('(\\(.*\\).*\\=\\>.*)import\\(([^())]+)\\)', 'g'),//regexp('\\bimport\\(([^())]+)\\)', 'g'),
 
-			scopedSlot: regexp('_t\\("([^"]+?)",(.*)(?:,{(.*?)}\\)|([^}]\\)))', 'g'),
+			scopedSlot: regexp('_t\\("([^"]+?)",(.*]|null)(?:\\)$|,{(.*)}\\)$)', 'g'),//regexp('_t\\("([^"]+?)",(.*)(?:,{(.*?)}\\)|((?=[^}])\\)))', 'g'),
 
 			tsType: regexp('type\\s+(\\S+)\\s*=.*(?:;|$)', 'gm'),
 			tsInterface: regexp('interface\\s+(\\S+)\\s*{.*?}(?:;|$)', 'gms'),
@@ -93,6 +93,7 @@ let VueCompiler = (function () {
 
 				let prev = fn.substring(start, end);
 				let curr = prev.replace(VueCompiler.regexp.scopedSlot, '(scopedSlots["$1"] ? scopedSlots["$1"]({$3}) : $2)');
+//				console.log('scopedSlot', fn, prev, curr, VueCompiler.regexp.scopedSlot.find(prev));
 				fn = fn.replace(prev, curr);
 			}
 
@@ -262,7 +263,7 @@ const test = Vue.defineAsyncComponent(() => new Promise((resolve, reject) => {
 								//
 //								console.log(/*'js', url,*/ js/*, script*/, context);
 								let name = absoluteURL.split('/').slice(-1)[0] || 'VueCompiler.js';
-								let func = context.main
+								var func = context.main
 									? '"use strict";' + (context.init || '') + 'return(' + (context.main.replace(/[\s;]+$/, '') || '{}') + ')'
 									: null;
 								try {
@@ -300,8 +301,9 @@ const test = Vue.defineAsyncComponent(() => new Promise((resolve, reject) => {
 													.replace('with(this)', 'with(_vm)')
 													.replace(VueCompiler.regexp.slot, 'slots()["$1"]'));
 
+												func = fn.substring(fn.indexOf('{') + 1, fn.lastIndexOf('}') - 1);
 //												temp.render = eval('(' + fn + ')' + '//# sourceURL=' + name + '.js');
-												temp.render = Function('_h', '_vm', fn.substring(fn.indexOf('{') + 1, fn.lastIndexOf('}') - 1) + '//# sourceURL=' + name + '.js');
+												temp.render = Function('_h', '_vm', func + '//# sourceURL=' + name + '.js');
 												temp.staticRenderFns = res.staticRenderFns;
 //												delete temp.template;
 											} else {
