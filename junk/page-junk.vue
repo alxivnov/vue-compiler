@@ -48,12 +48,14 @@
 			<span>{{ vCheck }}</span>
 		</tr>
 		<tr>
-			<form-check id="1st-radio" type="radio" value="1st" html-value="1st" v-model="vRadio">
-				form-check 1
-			</form-check>
-			<form-check id="2nd-radio" type="radio" value="2nd" html-value="2nd" v-model="vRadio">
-				form-check 2
-			</form-check>
+			<form-radio-group v-model="vRadio" name="vRadioInline" :options="{ '1st': 'form-check 1', '2nd': 'form-check 2' }" inline>
+				Inline
+			</form-radio-group>
+			<form-radio-group v-model="vRadio" name="vRadio" :options="{ '1st': 'form-check 1', '2nd': 'form-check 2' }">
+				<template #option="{ option }">
+					{{ option }} form-check
+				</template>
+			</form-radio-group>
 			<span>{{ vRadio }}</span>
 		</tr>
 		<tr>

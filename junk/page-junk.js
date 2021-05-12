@@ -6,6 +6,7 @@ import { prop } from 'module-exports.js';
 
 import FormInput from '../form-input.vue';
 const FormSelect = () => import('../form-select.vue');
+const FormRadioGroup = () => import('../form-radio-group.vue');
 
 import ImportFrom from 'import-from.vue';
 const ImportFunc = () => import('import-func.vue');
@@ -35,6 +36,7 @@ export default {
 
 		'form-input': FormInput,
 		'form-select': FormSelect,
+		'form-radio-group': FormRadioGroup,
 		'some': some,
 
 		'import-from': ImportFrom,
