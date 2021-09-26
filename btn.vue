@@ -1,6 +1,12 @@
 <template functional>
 	<div
 		:class="[
+			props.row !== undefined
+				? 'row'
+				: props.col !== undefined
+					? 'col' + (props.col ? '-' + props.col : '')
+					: null,
+
 			/**/props.btnStyle == 'link'
 				? null
 				: /**/'btn-group',
@@ -85,6 +91,9 @@
 export default {
 	inheritAttrs: false,
 	props: [
+		'col',						// auto|...
+		'row',						// true|FALSE
+
 		'btnType',					// BUTTON|submit
 		'btnStyle',					// PRIMARY|secondary|success|danger|warning|info|light|dark|link
 		'outline',					// true|FALSE
