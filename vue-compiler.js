@@ -1,3 +1,5 @@
+// https://vuejs.org/v2/guide/render-function.html#Functional-Components
+// https://v3.vuejs.org/guide/migration/introduction.html#breaking-changes
 let VueCompiler = (function () {
 	function regexp(pattern, flags) {
 		return new RegExp(
@@ -286,7 +288,9 @@ const test = Vue.defineAsyncComponent(() => new Promise((resolve, reject) => {
 													.replace(/data\./g, 'this.$data.')
 													.replace(/props\./g, 'this.')
 													.replace(/slots\(\)/g, 'this.$slots')
-												: html;
+													.replace(/\$scopedSlots/g, '$slots')
+												: html
+													.replace(/\$scopedSlots(.(\w+)|\[.+])/g, '$slots$1');
 										} else {
 											if (temp.functional) {
 												if (temp.computed)
@@ -392,7 +396,10 @@ const test = Vue.defineAsyncComponent(() => new Promise((resolve, reject) => {
 
 			var app = null;
 
+			let plugins = Array.isArray(options.use) ? options.use : options.use ? [ options.use ] : [];
 			if (Vue.component) {
+				plugins.forEach(plugin => Vue.use(plugin));
+
 				if (components)
 					this.import(components, settings && settings.mixin);
 
@@ -403,6 +410,8 @@ const test = Vue.defineAsyncComponent(() => new Promise((resolve, reject) => {
 						? options
 						: Object.assign({}, options, { data: function () { return options.data; } })
 				);
+
+				plugins.forEach(plugin => app.use(plugin));
 
 				app.import = this.import.bind(app);
 				if (components)
