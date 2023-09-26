@@ -52,7 +52,7 @@ let VueCompiler = (function () {
 			import: regexp('(?:^)\\s*import(?:\\s+([^\'"`].*?)\\s+from\\s+|\\s+)(?:\'|"|`)(.*?)(?:\'|"|`);?', 'gms'),//|\\r\\n
 			absolute: regexp('(\\(.*\\).*\\=\\>.*)import\\(([^())]+)\\)', 'g'),//regexp('\\bimport\\(([^())]+)\\)', 'g'),
 
-			scopedSlot: regexp('_t\\("([^"]+?)",(.*]|null)(?:\\)$|,{(.*)}\\)$)', 'g'),//regexp('_t\\("([^"]+?)",(.*)(?:,{(.*?)}\\)|((?=[^}])\\)))', 'g'),
+			scopedSlot: regexp('_t\\("([^"]+?)",(?:function\\(\\){return )*(.*]|null)(?:})*(?:\\)$|,{(.*)}\\)$)', 'g'),//regexp('_t\\("([^"]+?)",(.*)(?:,{(.*?)}\\)|((?=[^}])\\)))', 'g'),
 
 			tsType: regexp('type\\s+(\\S+)\\s*=.*(?:;|$)', 'gm'),
 			tsInterface: regexp('interface\\s+(\\S+)\\s*{.*?}(?:;|$)', 'gms'),
@@ -95,7 +95,7 @@ let VueCompiler = (function () {
 
 				let prev = fn.substring(start, end);
 				let curr = prev.replace(VueCompiler.regexp.scopedSlot, '(scopedSlots["$1"] ? scopedSlots["$1"]({$3}) : $2)');
-//				console.log('scopedSlot', fn, prev, curr, VueCompiler.regexp.scopedSlot.find(prev));
+//				console.log('scopedSlot', /*fn,*/ prev, curr, VueCompiler.regexp.scopedSlot.find(prev));
 				fn = fn.replace(prev, curr);
 			}
 
@@ -143,9 +143,7 @@ const test = Vue.defineAsyncComponent(() => new Promise((resolve, reject) => {
 						delete VueCompiler.global[url];
 					});
 
-				if (Vue.defineAsyncComponent)
-					component(name, Vue.defineAsyncComponent(function () { return def; }));
-				else if (Vue.component)
+				if (Vue.component)
 					Vue.component(name, function (resolve, reject) {
 						let val = VueCompiler.global[url];
 						if (val)
@@ -159,6 +157,8 @@ const test = Vue.defineAsyncComponent(() => new Promise((resolve, reject) => {
 									reject(err);
 								});
 					});
+				else if (Vue.defineAsyncComponent)
+					component(name, Vue.defineAsyncComponent(function () { return def; }));
 			});
 		},
 
@@ -263,7 +263,7 @@ const test = Vue.defineAsyncComponent(() => new Promise((resolve, reject) => {
 						let last = function (context) {
 							return new Promise(function (resolve, reject) {
 								//
-//								console.log(/*'js', url,*/ js/*, script*/, context);
+//								console.log(/*'js', url, js, script,*/ context);
 								let name = absoluteURL.split('/').slice(-1)[0] || 'VueCompiler.js';
 								var func = context.main
 									? '"use strict";' + (context.init || '') + 'return(' + (context.main.replace(/[\s;]+$/, '') || '{}') + ')'

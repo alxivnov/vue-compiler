@@ -249,7 +249,7 @@
 					</template>
 				</card>
 			</div>
-			<div class="col">
+			<div class="col accordion">
 				<card collapse="collapse" :show="true" header-border-color="light" header-text-color="primary">
 					<template #header>
 						<!-- <btn btn-style="link" block> -->
