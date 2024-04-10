@@ -181,7 +181,7 @@ const test = Vue.defineAsyncComponent(() => new Promise((resolve, reject) => {
 		settings: {},
 		cache: {},
 
-		download: function (url, mixins) {
+		download: function (url, mixins, thisArg = this) {
 			let absoluteURL = VueCompiler.absolute(url, document.baseURI);
 
 //			console.log('download', absoluteURL);
@@ -196,8 +196,9 @@ const test = Vue.defineAsyncComponent(() => new Promise((resolve, reject) => {
 				.then(function (res) { return res.ok ? res.text() : null })
 				.then(function (text) {
 					return VueCompiler.assemble(text, absoluteURL).then(function (text) {
-						var template = VueCompiler.regexp.template.find(text, true);
-						var script = VueCompiler.regexp.script.find(text, true);
+						let isHTML = /^\s*</.test(text);
+						var template = isHTML && VueCompiler.regexp.template.find(text, true);
+						var script = isHTML && VueCompiler.regexp.script.find(text, true);
 						script = !!script && script.length > 3 ? { attr: script[1], init: script[2], main: script[3] } : null;
 						//
 //						console.log('vue_component_definition', url, template, script);
@@ -236,9 +237,9 @@ const test = Vue.defineAsyncComponent(() => new Promise((resolve, reject) => {
 								syncImps.push(imp);
 						});
 
-						let ctx = { defs: {}, mixins, ver: Vue.component ? 2 : Vue.defineAsyncComponent ? 3 : 0 };
+						let ctx = { defs: {}, mixins, ver: Vue.component ? 2 : Vue.defineAsyncComponent ? 3 : 0, thisArg };
 						if (hasScript) {
-							var replaceValue = 'VueCompiler.download(VueCompiler.absolute($2, \'' + absoluteURL + '\'), context.mixins)';
+							var replaceValue = 'VueCompiler.download(VueCompiler.absolute($2, \'' + absoluteURL + '\'), context.mixins, context.thisArg)';
 
 							if (ctx.ver == 3)
 								replaceValue = 'Vue.defineAsyncComponent(function () { return ' + replaceValue + '; })';
@@ -250,7 +251,7 @@ const test = Vue.defineAsyncComponent(() => new Promise((resolve, reject) => {
 
 							asyncImps.forEach(function (imp) {
 								let asyncURL = VueCompiler.absolute(imp[2], absoluteURL);
-								var asyncReplace = 'function () { return VueCompiler.download(\'' + asyncURL + '\', context.mixins); }';
+								var asyncReplace = 'function () { return VueCompiler.download(\'' + asyncURL + '\', context.mixins, context.thisArg); }';
 								if (ctx.ver == 3)
 									asyncReplace = 'Vue.defineAsyncComponent(' + asyncReplace + ')';
 								asyncReplace = 'VueCompiler.global[\'' + asyncURL + '\'] || ' + asyncReplace;
@@ -263,7 +264,7 @@ const test = Vue.defineAsyncComponent(() => new Promise((resolve, reject) => {
 						let last = function (context) {
 							return new Promise(function (resolve, reject) {
 								//
-//								console.log(/*'js', url, js, script,*/ context);
+//								console.log(/*'js', url, js, script, */context);
 								let name = absoluteURL.split('/').slice(-1)[0] || 'VueCompiler.js';
 								var func = context.main
 									? '"use strict";' + (context.init || '') + 'return(' + (context.main.replace(/[\s;]+$/, '') || '{}') + ')'
@@ -272,7 +273,7 @@ const test = Vue.defineAsyncComponent(() => new Promise((resolve, reject) => {
 //									let func = '(function(){' + context.init + 'return ' + context.main + '})';
 //									let temp = context.main ? eval(func + '//# sourceURL=' + name)() : {};
 									var temp = func
-										? Function('context', func + '//# sourceURL=' + name)(context)
+										? Function('context', func + '//# sourceURL=' + name).call(context.thisArg, context)
 										: {};
 									if (hasTemplate) {
 //										temp.template = template[2];
@@ -338,12 +339,13 @@ const test = Vue.defineAsyncComponent(() => new Promise((resolve, reject) => {
 								}
 							});
 						};
+						let context = ctx;//
 						let promises = syncImps.filter(function (imp) {
 							return imp.length > 2;
 						}).map(function (imp) {
-							return function (context) {
+//							return function (context) {
 								let impURL = VueCompiler.absolute(imp[2], absoluteURL);
-								return VueCompiler.download(impURL, context.mixins).then(function (def) {
+								return VueCompiler.download(impURL, context.mixins, context.thisArg).then(function (def) {
 									if (def instanceof Object || def == null) {
 										context.defs[impURL] = def;
 										let name = imp[1] || imp[2]
@@ -365,10 +367,13 @@ const test = Vue.defineAsyncComponent(() => new Promise((resolve, reject) => {
 
 									return context;
 								});
-							};
+//							}
 						});
-						promises.push(last);
-						return VueCompiler.sequence(promises, ctx);
+						return Promise.allSettled(promises).then(function () {
+							return last(context);
+						});
+// 						promises.push(last);
+// 						return VueCompiler.sequence(promises, ctx);
 					});
 				});
 		},
