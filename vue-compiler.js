@@ -50,6 +50,8 @@ let VueCompiler = (function () {
 			script: regexp('<script([^>]*)>(.*?)(?:export\\s+default|module.exports\\s+=)\\s+(.*)<\/script>', 'gs'),
 			export: regexp('(.*?)(?:export\\s+default|module.exports\\s+=)\\s+(.*)', 'gms'),
 			import: regexp('(?:^)\\s*import(?:\\s+([^\'"`].*?)\\s+from\\s+|\\s+)(?:\'|"|`)(.*?)(?:\'|"|`);?', 'gms'),//|\\r\\n
+			// TODO: Join import and awaitimport
+//			awaitimport: regexp('(?:^)\\s*const\\s+([^\'"`].*?)\\s*=\\s*await\\s+import\\(\\s*(?:\'|"|`)(.*?)(?:\'|"|`)\\s*\\);?', 'gms'),//|\\r\\n
 			absolute: regexp('(\\(.*\\).*\\=\\>.*)import\\(([^())]+)\\)', 'g'),//regexp('\\bimport\\(([^())]+)\\)', 'g'),
 
 			scopedSlot: regexp('_t\\("([^"]+?)",(?:function\\(\\){return )*(.*]|null)(?:})*(?:\\)$|,{(.*)}\\)$)', 'g'),//regexp('_t\\("([^"]+?)",(.*)(?:,{(.*?)}\\)|((?=[^}])\\)))', 'g'),
@@ -135,7 +137,8 @@ const test = Vue.defineAsyncComponent(() => new Promise((resolve, reject) => {
 			*/
 
 				let url = VueCompiler.absolute(components[name], document.baseURI);
-				let def = VueCompiler.download(components[name], mixins);
+
+				let comp = function (name, url, def) {
 				if (name.startsWith('Base'))
 					def.then(function (def) {
 						VueCompiler.global[url] = def;
@@ -159,6 +162,29 @@ const test = Vue.defineAsyncComponent(() => new Promise((resolve, reject) => {
 					});
 				else if (Vue.defineAsyncComponent)
 					component(name, Vue.defineAsyncComponent(function () { return def; }));
+				};
+
+				if (name.startsWith('Bundle')) {
+					return fetch(url)
+						.then(function (res) {
+							return res.ok ? res.formData() : null;
+						})
+						.then(function (form) {
+							[...form.keys()].forEach(function (name) {
+								let file = form.get(name);
+								let absoluteURL = `${url}/${name}`;
+								let def = file.text()
+									.then(function (text) {
+										return VueCompiler.template(absoluteURL, text, mixins);
+									});
+								comp(name, absoluteURL, def);
+							});
+					});
+				} else {
+					let def = VueCompiler.download(components[name], mixins);
+
+					comp(name, url, def);
+				}
 			});
 		},
 
@@ -193,8 +219,15 @@ const test = Vue.defineAsyncComponent(() => new Promise((resolve, reject) => {
 				});
 
 			return fetch(url)
-				.then(function (res) { return res.ok ? res.text() : null })
+				.then(function (res) {
+					return res.ok ? res.text() : null;
+				})
 				.then(function (text) {
+					return VueCompiler.template(absoluteURL, text, mixins, thisArg);
+				});
+		},
+
+		template: function (absoluteURL, text, mixins, thisArg = this) {
 					return VueCompiler.assemble(text, absoluteURL).then(function (text) {
 						let isHTML = /^\s*</.test(text);
 						var template = isHTML && VueCompiler.regexp.template.find(text, true);
@@ -227,6 +260,8 @@ const test = Vue.defineAsyncComponent(() => new Promise((resolve, reject) => {
 						}
 
 						let imps = hasScript ? VueCompiler.regexp.import.findAll(script.init, true) : [];
+//						if (hasScript && imps.length === 0)
+//							imps = VueCompiler.regexp.awaitimport.findAll(script.init, true);
 
 						let asyncImps = [];
 						let syncImps = [];
@@ -375,7 +410,6 @@ const test = Vue.defineAsyncComponent(() => new Promise((resolve, reject) => {
 // 						promises.push(last);
 // 						return VueCompiler.sequence(promises, ctx);
 					});
-				});
 		},
 
 		assemble: function (text, base) {
@@ -388,7 +422,9 @@ const test = Vue.defineAsyncComponent(() => new Promise((resolve, reject) => {
 						: src[2];
 //					console.log('assemble', base, url, text);
 					return fetch(url)
-						.then(function (res) { return res.ok ? res.text() : null; })
+						.then(function (res) {
+							return res.ok ? res.text() : null;
+						})
 						.then(function (cont) {
 							return text.replace(src[0], '<' + src[1] + '>\r\n' + (cont || '') + '\r\n</' + src[1] + '>');
 						});
