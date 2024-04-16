@@ -51,6 +51,7 @@ let VueCompiler = (function () {
 			export: regexp('(.*?)(?:export\\s+default|module.exports\\s+=)\\s+(.*)', 'gms'),
 			import: regexp('(?:^)\\s*import(?:\\s+([^\'"`].*?)\\s+from\\s+|\\s+)(?:\'|"|`)(.*?)(?:\'|"|`);?', 'gms'),//|\\r\\n
 			// TODO: Join import and awaitimport
+			// TODO: Fix test page
 //			awaitimport: regexp('(?:^)\\s*const\\s+([^\'"`].*?)\\s*=\\s*await\\s+import\\(\\s*(?:\'|"|`)(.*?)(?:\'|"|`)\\s*\\);?', 'gms'),//|\\r\\n
 			absolute: regexp('(\\(.*\\).*\\=\\>.*)import\\(([^())]+)\\)', 'g'),//regexp('\\bimport\\(([^())]+)\\)', 'g'),
 
@@ -170,15 +171,16 @@ const test = Vue.defineAsyncComponent(() => new Promise((resolve, reject) => {
 							return res.ok ? res.formData() : null;
 						})
 						.then(function (form) {
-							[...form.keys()].forEach(function (name) {
-								let file = form.get(name);
-								let absoluteURL = `${url}/${name}`;
-								let def = file.text()
-									.then(function (text) {
-										return VueCompiler.template(absoluteURL, text, mixins);
-									});
-								comp(name, absoluteURL, def);
-							});
+							if (form instanceof FormData)
+								[...form.keys()].forEach(function (name) {
+									let file = form.get(name);
+									let absoluteURL = `${url}/${name}`;
+									let def = file.text()
+										.then(function (text) {
+											return VueCompiler.template(absoluteURL, text, mixins);
+										});
+									comp(name, absoluteURL, def);
+								});
 					});
 				} else {
 					let def = VueCompiler.download(components[name], mixins);
@@ -228,188 +230,188 @@ const test = Vue.defineAsyncComponent(() => new Promise((resolve, reject) => {
 		},
 
 		template: function (absoluteURL, text, mixins, thisArg = this) {
-					return VueCompiler.assemble(text, absoluteURL).then(function (text) {
-						let isHTML = /^\s*</.test(text);
-						var template = isHTML && VueCompiler.regexp.template.find(text, true);
-						var script = isHTML && VueCompiler.regexp.script.find(text, true);
-						script = !!script && script.length > 3 ? { attr: script[1], init: script[2], main: script[3] } : null;
-						//
-//						console.log('vue_component_definition', url, template, script);
-						if (!template && !script) {
-							script = VueCompiler.regexp.export.find(text, true);
-							script = !!script && script.length > 2 ? { attr: '', init: script[1], main: script[2] } : null;
-						}
+			return VueCompiler.assemble(text, absoluteURL).then(function (text) {
+				let isHTML = /^\s*</.test(text);
+				var template = isHTML && VueCompiler.regexp.template.find(text, true);
+				var script = isHTML && VueCompiler.regexp.script.find(text, true);
+				script = !!script && script.length > 3 ? { attr: script[1], init: script[2], main: script[3] } : null;
+				//
+//				console.log('vue_component_definition', url, template, script);
+				if (!template && !script) {
+					script = VueCompiler.regexp.export.find(text, true);
+					script = !!script && script.length > 2 ? { attr: '', init: script[1], main: script[2] } : null;
+				}
 
-						let hasTemplate = !!template && template.length > 2;
-						let hasScript = !!script;//!!script && script.length > 2;
+				let hasTemplate = !!template && template.length > 2;
+				let hasScript = !!script;//!!script && script.length > 2;
 
-						if (!!script && script.attr.includes('lang="ts"')) {
-							let stripper = VueCompiler.tsStripper([script.init, script.main]);
-							script.init = script.init.replace(stripper, '');
-							script.main = script.main.replace(stripper, '');
+				if (!!script && script.attr.includes('lang="ts"')) {
+					let stripper = VueCompiler.tsStripper([script.init, script.main]);
+					script.init = script.init.replace(stripper, '');
+					script.main = script.main.replace(stripper, '');
 
-							let defineComponent = 'defineComponent';
-							if (script.main.startsWith(defineComponent))
-								script.main = script.main.substring(defineComponent.length);
-						}
+					let defineComponent = 'defineComponent';
+					if (script.main.startsWith(defineComponent))
+						script.main = script.main.substring(defineComponent.length);
+				}
 
-						if (!hasTemplate && !hasScript) {
-							let json = JSON.tryParse(text);
+				if (!hasTemplate && !hasScript) {
+					let json = JSON.tryParse(text);
 
-							return json === undefined ? text ? { template: '<span>' + text + '</span>' } : null : json;//text;
-						}
+					return json === undefined ? text ? { template: '<span>' + text + '</span>' } : null : json;//text;
+				}
 
-						let imps = hasScript ? VueCompiler.regexp.import.findAll(script.init, true) : [];
-//						if (hasScript && imps.length === 0)
-//							imps = VueCompiler.regexp.awaitimport.findAll(script.init, true);
+				let imps = hasScript ? VueCompiler.regexp.import.findAll(script.init, true) : [];
+//				if (hasScript && imps.length === 0)
+//					imps = VueCompiler.regexp.awaitimport.findAll(script.init, true);
 
-						let asyncImps = [];
-						let syncImps = [];
-						imps.forEach(function (imp) {
-							if (VueCompiler.settings.async && imp[2].search(VueCompiler.settings.async) > -1)
-								asyncImps.push(imp);
-							else
-								syncImps.push(imp);
-						});
+				let asyncImps = [];
+				let syncImps = [];
+				imps.forEach(function (imp) {
+					if (VueCompiler.settings.async && imp[2].search(VueCompiler.settings.async) > -1)
+						asyncImps.push(imp);
+					else
+						syncImps.push(imp);
+				});
 
-						let ctx = { defs: {}, mixins, ver: Vue.component ? 2 : Vue.defineAsyncComponent ? 3 : 0, thisArg };
-						if (hasScript) {
-							var replaceValue = 'VueCompiler.download(VueCompiler.absolute($2, \'' + absoluteURL + '\'), context.mixins, context.thisArg)';
+				let ctx = { defs: {}, mixins, ver: Vue.component ? 2 : Vue.defineAsyncComponent ? 3 : 0, thisArg };
+				if (hasScript) {
+					var replaceValue = 'VueCompiler.download(VueCompiler.absolute($2, \'' + absoluteURL + '\'), context.mixins, context.thisArg)';
 
-							if (ctx.ver == 3)
-								replaceValue = 'Vue.defineAsyncComponent(function () { return ' + replaceValue + '; })';
-							else
-								replaceValue = '$1' + replaceValue;
+					if (ctx.ver == 3)
+						replaceValue = 'Vue.defineAsyncComponent(function () { return ' + replaceValue + '; })';
+					else
+						replaceValue = '$1' + replaceValue;
 
-							ctx.init = script.init.replace(VueCompiler.regexp.absolute, replaceValue);
-							ctx.main = script.main.replace(VueCompiler.regexp.absolute, replaceValue);
+					ctx.init = script.init.replace(VueCompiler.regexp.absolute, replaceValue);
+					ctx.main = script.main.replace(VueCompiler.regexp.absolute, replaceValue);
 
-							asyncImps.forEach(function (imp) {
-								let asyncURL = VueCompiler.absolute(imp[2], absoluteURL);
-								var asyncReplace = 'function () { return VueCompiler.download(\'' + asyncURL + '\', context.mixins, context.thisArg); }';
-								if (ctx.ver == 3)
-									asyncReplace = 'Vue.defineAsyncComponent(' + asyncReplace + ')';
-								asyncReplace = 'VueCompiler.global[\'' + asyncURL + '\'] || ' + asyncReplace;
+					asyncImps.forEach(function (imp) {
+						let asyncURL = VueCompiler.absolute(imp[2], absoluteURL);
+						var asyncReplace = 'function () { return VueCompiler.download(\'' + asyncURL + '\', context.mixins, context.thisArg); }';
+						if (ctx.ver == 3)
+							asyncReplace = 'Vue.defineAsyncComponent(' + asyncReplace + ')';
+						asyncReplace = 'VueCompiler.global[\'' + asyncURL + '\'] || ' + asyncReplace;
 
-								ctx.init = ctx.init.replace(imp[0], 'const ' + imp[1] + ' = ' + asyncReplace + ';');
-							});
-						}
-						//
-//						console.log('imps', absoluteURL, imps, ctx.init);
-						let last = function (context) {
-							return new Promise(function (resolve, reject) {
-								//
-//								console.log(/*'js', url, js, script, */context);
-								let name = absoluteURL.split('/').slice(-1)[0] || 'VueCompiler.js';
-								var func = context.main
-									? '"use strict";' + (context.init || '') + 'return(' + (context.main.replace(/[\s;]+$/, '') || '{}') + ')'
-									: null;
-								try {
-//									let func = '(function(){' + context.init + 'return ' + context.main + '})';
-//									let temp = context.main ? eval(func + '//# sourceURL=' + name)() : {};
-									var temp = func
-										? Function('context', func + '//# sourceURL=' + name).call(context.thisArg, context)
-										: {};
-									if (hasTemplate) {
-//										temp.template = template[2];
-										temp.functional = template[1].includes('functional');
-
-										let html = template[2];
-										if (context.ver == 3) {
-											temp.template = temp.functional
-												? html
-//													.replace('v-bind="data.attrs"', 'v-bind="this.$attrs"')
-													.replace('listeners', '{}')
-													.replace(/data\.attrs/g, 'this.$attrs')
-													.replace(/data\./g, 'this.$data.')
-													.replace(/props\./g, 'this.')
-													.replace(/slots\(\)/g, 'this.$slots')
-													.replace(/\$scopedSlots/g, '$slots')
-												: html
-													.replace(/\$scopedSlots(.(\w+)|\[.+])/g, '$slots$1');
-										} else {
-											if (temp.functional) {
-												if (temp.computed)
-													Object.keys(temp.computed).forEach(key => {
-														let func = temp.computed[key].toString();
-														html = html.replace(regexp(key, 'gm'), (func.startsWith('function') ? '(' : '(function ') + func + ')()');
-													});
-
-												let res = Vue.compile(html);
-												let fn = VueCompiler.scopedSlot(res.render.toString()
-													.replace('anonymous(', '(_h, _vm')
-													.replace('with(this)', 'with(_vm)')
-													.replace(VueCompiler.regexp.slot, 'slots()["$1"]'));
-
-												func = fn.substring(fn.indexOf('{') + 1, fn.lastIndexOf('}') - 1);
-//												temp.render = eval('(' + fn + ')' + '//# sourceURL=' + name + '.js');
-												temp.render = Function('_h', '_vm', func + '//# sourceURL=' + name + '.js');
-												temp.staticRenderFns = res.staticRenderFns;
-//												delete temp.template;
-											} else {
-												temp.template = html;
-											}
-										}
-
-										temp.mixins = context.mixins;
-									}
-
-									if (VueCompiler.settings.cache) {
-										VueCompiler.cache[absoluteURL] = {
-											temp: temp,
-											time: new Date()
-										};
-
-//										console.log('cached', absoluteURL);
-									}
-
-									resolve(temp);
-								} catch (err) {
-									err.name = name;
-									err.func = func;
-
-									console.log('eval', err, name, func);
-
-									reject(err);
-								}
-							});
-						};
-						let context = ctx;//
-						let promises = syncImps.filter(function (imp) {
-							return imp.length > 2;
-						}).map(function (imp) {
-//							return function (context) {
-								let impURL = VueCompiler.absolute(imp[2], absoluteURL);
-								return VueCompiler.download(impURL, context.mixins, context.thisArg).then(function (def) {
-									if (def instanceof Object || def == null) {
-										context.defs[impURL] = def;
-										let name = imp[1] || imp[2]
-											.split('/')
-											.slice(-1)[0]
-											.split('.')
-											.slice(0, -1)[0]
-											.split('-')
-											.map(function (s, i) {
-												return /*i > 0 ?*/ s.slice(0, 1).toUpperCase() + s.slice(1) /*: s*/;
-											})
-											.join('');
-										//
-//										console.log('def', imp, name, def);
-										def = 'let ' + name + ' = context.defs[\'' + impURL + '\'];';
-									}
-
-									context.init = context.init.replace(imp[0], def);
-
-									return context;
-								});
-//							}
-						});
-						return Promise.allSettled(promises).then(function () {
-							return last(context);
-						});
-// 						promises.push(last);
-// 						return VueCompiler.sequence(promises, ctx);
+						ctx.init = ctx.init.replace(imp[0], 'const ' + imp[1] + ' = ' + asyncReplace + ';');
 					});
+				}
+				//
+//				console.log('imps', absoluteURL, imps, ctx.init);
+				let last = function (context) {
+					return new Promise(function (resolve, reject) {
+						//
+//						console.log(/*'js', url, js, script, */context);
+						let name = absoluteURL.split('/').slice(-1)[0] || 'VueCompiler.js';
+						var func = context.main
+							? '"use strict";' + (context.init || '') + 'return(' + (context.main.replace(/[\s;]+$/, '') || '{}') + ')'
+							: null;
+						try {
+//							let func = '(function(){' + context.init + 'return ' + context.main + '})';
+//							let temp = context.main ? eval(func + '//# sourceURL=' + name)() : {};
+							var temp = func
+								? Function('context', func + '//# sourceURL=' + name).call(context.thisArg, context)
+								: {};
+							if (hasTemplate) {
+//								temp.template = template[2];
+								temp.functional = template[1].includes('functional');
+
+								let html = template[2];
+								if (context.ver == 3) {
+									temp.template = temp.functional
+										? html
+//											.replace('v-bind="data.attrs"', 'v-bind="this.$attrs"')
+											.replace('listeners', '{}')
+											.replace(/data\.attrs/g, 'this.$attrs')
+											.replace(/data\./g, 'this.$data.')
+											.replace(/props\./g, 'this.')
+											.replace(/slots\(\)/g, 'this.$slots')
+											.replace(/\$scopedSlots/g, '$slots')
+										: html
+											.replace(/\$scopedSlots(.(\w+)|\[.+])/g, '$slots$1');
+								} else {
+									if (temp.functional) {
+										if (temp.computed)
+											Object.keys(temp.computed).forEach(key => {
+												let func = temp.computed[key].toString();
+												html = html.replace(regexp(key, 'gm'), (func.startsWith('function') ? '(' : '(function ') + func + ')()');
+											});
+
+										let res = Vue.compile(html);
+										let fn = VueCompiler.scopedSlot(res.render.toString()
+											.replace('anonymous(', '(_h, _vm')
+											.replace('with(this)', 'with(_vm)')
+											.replace(VueCompiler.regexp.slot, 'slots()["$1"]'));
+
+										func = fn.substring(fn.indexOf('{') + 1, fn.lastIndexOf('}') - 1);
+//										temp.render = eval('(' + fn + ')' + '//# sourceURL=' + name + '.js');
+										temp.render = Function('_h', '_vm', func + '//# sourceURL=' + name + '.js');
+										temp.staticRenderFns = res.staticRenderFns;
+//										delete temp.template;
+									} else {
+										temp.template = html;
+									}
+								}
+
+								temp.mixins = context.mixins;
+							}
+
+							if (VueCompiler.settings.cache) {
+								VueCompiler.cache[absoluteURL] = {
+									temp: temp,
+									time: new Date()
+								};
+
+//								console.log('cached', absoluteURL);
+							}
+
+							resolve(temp);
+						} catch (err) {
+							err.name = name;
+							err.func = func;
+
+							console.log('eval', err, name, func);
+
+							reject(err);
+						}
+					});
+				};
+				let context = ctx;//
+				let promises = syncImps.filter(function (imp) {
+					return imp.length > 2;
+				}).map(function (imp) {
+//					return function (context) {
+						let impURL = VueCompiler.absolute(imp[2], absoluteURL);
+						return VueCompiler.download(impURL, context.mixins, context.thisArg).then(function (def) {
+							if (def instanceof Object || def == null) {
+								context.defs[impURL] = def;
+								let name = imp[1] || imp[2]
+									.split('/')
+									.slice(-1)[0]
+									.split('.')
+									.slice(0, -1)[0]
+									.split('-')
+									.map(function (s, i) {
+										return /*i > 0 ?*/ s.slice(0, 1).toUpperCase() + s.slice(1) /*: s*/;
+									})
+									.join('');
+								//
+//								console.log('def', imp, name, def);
+								def = 'let ' + name + ' = context.defs[\'' + impURL + '\'];';
+							}
+
+							context.init = context.init.replace(imp[0], def);
+
+							return context;
+						});
+//					}
+				});
+				return Promise.allSettled(promises).then(function () {
+					return last(context);
+				});
+// 				promises.push(last);
+// 				return VueCompiler.sequence(promises, ctx);
+			});
 		},
 
 		assemble: function (text, base) {
