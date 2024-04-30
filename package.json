@@ -1,0 +1,18 @@
+{
+	"name": "vue-compiler",
+	"description": "Script that enables usage of Vue.js Single File Components directly in browser.",
+	"version": "0.0.1",
+	"author": "Alexander Ivanov <alex.p.ivanov+vue-compiler@gmail.com> (https://alxivnov.github.io/me/)",
+	"license": "MIT",
+	"repository": {
+		"type": "git",
+		"url": "https://github.com/alxivnov/vue-compiler.git"
+	},
+	"homepage": "https://alxivnov.github.io/vue-compiler/",
+	"scripts": {
+
+	},
+	"dependencies": {
+
+	}
+}

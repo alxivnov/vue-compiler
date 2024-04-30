@@ -1,6 +1,6 @@
 // https://vuejs.org/v2/guide/render-function.html#Functional-Components
 // https://v3.vuejs.org/guide/migration/introduction.html#breaking-changes
-let VueCompiler = (function () {
+const VueCompiler = (function () {
 	function regexp(pattern, flags) {
 		return new RegExp(
 			flags.includes('s')
@@ -116,8 +116,10 @@ let VueCompiler = (function () {
 				let name = curr
 					.split('/')
 					.slice(-1)[0]
+				name = !name.includes('.') ? [name] : name
 					.split('.')
 					.slice(0, -1)
+				name = name
 					.map(function (el) {
 						return el.replace(VueCompiler.regexp.name, '-');
 					})
@@ -439,7 +441,7 @@ const test = Vue.defineAsyncComponent(() => new Promise((resolve, reject) => {
 
 			var app = null;
 
-			let plugins = Array.isArray(options.use) ? options.use : options.use ? [ options.use ] : [];
+			let plugins = Array.isArray(options.use) ? options.use : options.use ? [options.use] : [];
 			if (Vue.component) {
 				plugins.forEach(plugin => Vue.use(plugin));
 
@@ -468,3 +470,7 @@ const test = Vue.defineAsyncComponent(() => new Promise((resolve, reject) => {
 		}
 	};
 }());
+
+if (typeof (module) === 'object' && module && module.exports) {
+	module.exports = VueCompiler;
+}
