@@ -1,4 +1,6 @@
-- [ ] `await import`
-- [ ] Test tab
+- [x] `await import`
+- [x] ESM
+- [ ] import/extends/function
+- [ ] Test page
 - [ ] Composition API
 - [ ] Vapor Mode

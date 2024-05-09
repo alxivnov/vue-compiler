@@ -58,8 +58,15 @@
 			:data-bs-content="props.popoverContent"
 			:data-bs-placement="props.popoverPlacement"
 		>
+			<i
+				v-if="props.bi"
+				:class="{
+					'bi': true,
+					['bi-' + props.bi]: true
+				}"
+			></i>
 			<span
-				:v-show="props.fas"
+				v-else-if="props.fas"
 				:class="{
 					'fas': props.fas,
 					['fa-' + props.fas]: props.fas,
@@ -103,7 +110,8 @@ export default {
 //		active						// FALSE|true
 //		disabled					// FALSE|true
 
-		'fas',						// font awesome
+		'bi',						// Bootstrap Icons
+		'fas',						// Font Awesome
 
 		'dropdownDirection',		// up|right|left
 		'dropdownAlignment',		// right|LEFT

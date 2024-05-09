@@ -60,11 +60,25 @@
 	<script src="https://cdn.jsdelivr.net/npm/masonry-layout@4.2.2/dist/masonry.pkgd.min.js" integrity="sha384-GNFwBvfVxBkLMJpYMOABq3c+d3KnQxudP/mGPkzpZSTYykLBNsZEnG2D9G/X/+7D" crossorigin="anonymous" async></script>
 
 	<!-- <script src="https://cdn.jsdelivr.net/npm/vue@2/dist/vue.js"></script> -->
-	<script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
+	<!-- <script src="https://unpkg.com/vue@3/dist/vue.global.js" type="module"></script> -->
 
 	<script src="./vue-compiler.js"></script>
 
-	<script>
+	<script type="importmap">
+		{
+			"imports": {
+				"vue": "https://unpkg.com/vue@3/dist/vue.esm-browser.js"
+			}
+		}
+	</script>
+	<script type="module">
+		import {
+			createApp,
+			compile,
+			defineAsyncComponent,
+			h,
+		} from 'vue';
+
 		let comp = [
 			'btn-group.vue',
 			'btn.vue',
@@ -94,7 +108,14 @@
 			}
 		};
 
-		VueCompiler.createApp(opts, comp, { cache: true, async: /\.vue$|(?:^|\/)vue\//g });
+
+
+		VueCompiler.createApp(opts, comp, { cache: true, async: /\.vue$|(?:^|\/)vue\//g, Vue: {
+			compile,
+			createApp,
+			defineAsyncComponent,
+			h,
+		} });
 	</script>
 </body>
 </html>

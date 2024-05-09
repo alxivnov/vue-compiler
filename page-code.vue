@@ -32,7 +32,7 @@
 				&lt;/html></code>
 		</pre>
 		<div class="text-center">
-			<btn fas="cog" btn-style="success">
+			<btn bi="gear-fill" btn-style="success">
 				Font
 				<template #dropdown>
 					<dropdown-header>Font</dropdown-header>
