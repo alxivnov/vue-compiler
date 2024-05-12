@@ -284,7 +284,7 @@ const test = VueCompiler.Vue.defineAsyncComponent(() => new Promise((resolve, re
 
 					if (ctx.ver == 3)
 						replaceValue = 'VueCompiler.Vue.defineAsyncComponent(function () { return ' + replaceValue + '; })';
-					else
+					// else
 						replaceValue = '$1' + replaceValue;
 
 					ctx.init = script.init.replace(VueCompiler.regexp.absolute, replaceValue);
