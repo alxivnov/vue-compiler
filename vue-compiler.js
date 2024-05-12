@@ -42,6 +42,8 @@ const VueCompiler = (function () {
 //		Vue.prototype.import = importComponents;
 
 	return {
+		Vue: typeof (Vue) == 'undefined' ? undefined : Vue,
+
 		regexp: {
 			name: regexp('[^\\d\\w-]', 'g'),
 			slot: regexp('_t\\("([^"]+?)"\\)', 'g'),
@@ -51,7 +53,7 @@ const VueCompiler = (function () {
 			export: regexp('(.*?)(?:export\\s+default|module.exports\\s+=)\\s+(.*)', 'gms'),
 			import: regexp('(?:^)\\s*(?:await\s+)?import(?:\\s+([^\'"`].*?)\\s+from\\s+|\\s+)(?:\'|"|`)(.*?)(?:\'|"|`);?', 'gms'),//|\\r\\n
 //			awaitimport: regexp('(?:^)\\s*const\\s+([^\'"`].*?)\\s*=\\s*await\\s+import\\(\\s*(?:\'|"|`)(.*?)(?:\'|"|`)\\s*\\);?', 'gms'),//|\\r\\n
-			absolute: regexp('(\\(.*\\).*\\=\\>.*)import\\(([^())]+)\\)', 'g'),//regexp('\\bimport\\(([^())]+)\\)', 'g'),
+			absolute: regexp('(\\([^()=>]*\\)\\s*\\=\\>\\s*)import\\(([^())]+)\\)', 'g'),//regexp('\\bimport\\(([^())]+)\\)', 'g'),
 
 			scopedSlot: regexp('_t\\("([^"]+?)",(?:function\\(\\){return )*(.*]|null)(?:})*(?:\\)$|,{(.*)}\\)$)', 'g'),//regexp('_t\\("([^"]+?)",(.*)(?:,{(.*?)}\\)|((?=[^}])\\)))', 'g'),
 
@@ -284,7 +286,7 @@ const test = VueCompiler.Vue.defineAsyncComponent(() => new Promise((resolve, re
 
 					if (ctx.ver == 3)
 						replaceValue = 'VueCompiler.Vue.defineAsyncComponent(function () { return ' + replaceValue + '; })';
-					// else
+					else
 						replaceValue = '$1' + replaceValue;
 
 					ctx.init = script.init.replace(VueCompiler.regexp.absolute, replaceValue);
@@ -311,7 +313,7 @@ const test = VueCompiler.Vue.defineAsyncComponent(() => new Promise((resolve, re
 						//
 //						console.log(/*'js', url, js, script, */context);
 						let esm = typeof (Vue) == 'undefined'
-							? 'const Vue = VueCompiler.Vue;'
+							? '\nconst Vue = VueCompiler.Vue;'
 							: '';
 						let name = absoluteURL.split('/').slice(-1)[0] || 'VueCompiler.js';
 						var func = context.main
@@ -442,7 +444,7 @@ const test = VueCompiler.Vue.defineAsyncComponent(() => new Promise((resolve, re
 							return res.ok ? res.text() : null;
 						})
 						.then(function (cont) {
-							return text.replace(src[0], '<' + src[1] + '>\r\n' + (cont || '') + '\r\n</' + src[1] + '>');
+							return text.replace(src[0], '<' + src[1] + '>\n' + (cont || '') + '\n</' + src[1] + '>');
 						});
 				});
 			}, Promise.resolve(text));

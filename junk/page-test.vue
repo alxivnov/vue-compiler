@@ -35,8 +35,12 @@ export default {
 					if (!comp[key])
 						comp[key] = () => import(url);
 
-					return comp;
-				}, { markRaw: true });
+					return typeof (Vue.markRaw) == 'function'
+						// Vue 3
+						? Vue.markRaw(comp)
+						// Vue 2
+						: comp;
+				}, { /*markRaw: true*/ });
 			// .reduce((prev, curr) => {
 			// 	prev[curr.url] = () => import(`/junk/${curr.url}.vue`);
 			// 	return prev;
