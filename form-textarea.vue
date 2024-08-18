@@ -29,7 +29,7 @@
 				...(data.attrs && data.attrs.modelValue !== undefined
 					? {
 						value: data.attrs.modelValue,
-						onChange: $event => $emit('update:modelValue', $event.target.value)
+						onInput: $event => $emit('update:modelValue', $event.target.value)
 					}
 					: {})
 			}"

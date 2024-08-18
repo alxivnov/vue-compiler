@@ -64,6 +64,54 @@ const VueCompiler = (function () {
 			metacharacters: regexp('([\\\\\\^\\$\\.\\|\\?\\*\\+\\(\\)\\[\\{]{1})', 'gm')
 		},
 
+		vue2: {
+			listeners(attrs) {
+				return Object.keys(attrs)
+					.filter((key) => key.startsWith('on') && typeof (attrs[key]) == 'function')
+					.reduce((listeners, key) => ({ ...listeners, [key[2].toLowerCase() + key.substring(3)]: attrs[key] }), {});
+			},
+			createElement(type, props, children) {
+				let vue3 = {
+					...props,
+
+					...(props.attrs || {}),
+					attrs: undefined,
+
+					...(props.domProps || {}),
+					domProps: undefined,
+
+					...Object.keys(props.on || {})
+						.reduce((listeners, key) => ({ ...listeners, ['on' + key[0].toUpperCase() + key.substring(1)]: props.on[key] }), {}),
+					on: undefined,
+				};
+				return VueCompiler.Vue.h(type, vue3, children);
+			},
+			mixin: {
+				computed: {
+					$listeners() {
+						return VueCompiler.vue2.listeners(this.$attrs || {});
+					}
+				},
+				methods: {
+					$on: () => {
+						console.error('$on instance method is removed in Vue 3.');
+					},
+					$off: () => {
+						console.error('$off instance method is removed in Vue 3.');
+					},
+					$once: () => {
+						console.error('$once instance method is removed in Vue 3.');
+					},
+					$set: (target, propertyName, value) => {
+						target[propertyName] = value;
+					},
+					$delete: (target, propertyName) => {
+						delete target[propertyName];
+					},
+				}
+			}
+		},
+
 		tsStripper(param) {
 			param = Array.isArray(param) ? param : [param];
 
@@ -149,7 +197,7 @@ const test = VueCompiler.Vue.defineAsyncComponent(() => new Promise((resolve, re
 						delete VueCompiler.global[url];
 					});
 
-				if (VueCompiler.Vue.component)
+				if (VueCompiler.Vue/*component*/.version < '3.0')
 					VueCompiler.Vue.component(name, function (resolve, reject) {
 						let val = VueCompiler.global[url];
 						if (val)
@@ -280,7 +328,22 @@ const test = VueCompiler.Vue.defineAsyncComponent(() => new Promise((resolve, re
 				// 	console.log(VueCompiler.settings.async, /*imps, */asyncImps/*, syncImps*/);
 				// }
 
-				let ctx = { defs: {}, mixins, ver: VueCompiler.Vue.component ? 2 : VueCompiler.Vue.defineAsyncComponent ? 3 : 0, thisArg };
+				let ver = VueCompiler.Vue./*component*/version < '3.0'
+					? 2
+					: VueCompiler.Vue.defineAsyncComponent
+						? 3
+						: 0;
+				let ctx = {
+					defs: {},
+					mixins: ver == 3
+						? [
+							...(mixins || []),
+							VueCompiler.vue2.mixin
+						]
+						: mixins,
+					ver,
+					thisArg
+				};
 				if (hasScript) {
 					var replaceValue = 'VueCompiler.download(VueCompiler.absolute($2, \'' + absoluteURL + '\'), context.mixins, context.thisArg)';
 
@@ -315,7 +378,7 @@ const test = VueCompiler.Vue.defineAsyncComponent(() => new Promise((resolve, re
 						let esm = typeof (Vue) == 'undefined'
 							? '\nconst Vue = VueCompiler.Vue;'
 							: '';
-						let name = absoluteURL.split('/').slice(-1)[0] || 'VueCompiler.js';
+						let name = absoluteURL.split('/').slice(-1)[0].split('.').slice(0, -1).join('') || 'VueCompiler.js';
 						var func = context.main
 							? '"use strict";' + esm + (context.init || '') + 'return(' + (context.main.replace(/[\s;]+$/, '') || '{}') + ')'
 							: null;
@@ -333,20 +396,27 @@ const test = VueCompiler.Vue.defineAsyncComponent(() => new Promise((resolve, re
 								if (context.ver == 3) {
 									temp.template = temp.functional
 										? html
-//											.replace('v-bind="data.attrs"', 'v-bind="this.$attrs"')
-											.replace('listeners', '{}')
-											.replace(/data\.attrs/g, 'this.$attrs')
-											.replace(/data\./g, 'this.$data.')
-											.replace(/props\./g, 'this.')
-											.replace(/slots\(\)/g, 'this.$slots')
+//											.replace('v-bind="data.attrs"', 'v-bind="$attrs"')
+											.replace(/listeners/g, /*'{}'*/'$listeners')
+											.replace(/data\.attrs/g, '$attrs')
+											.replace(/data\./g, '$data.')
+											.replace(/props\./g, '')
+											.replace(/slots\(\)/g, '$slots')
 											.replace(/\$scopedSlots/g, '$slots')
 										: html
 											.replace(/\$scopedSlots(.(\w+)|\[.+])/g, '$slots$1');
+									// temp.template = temp.template
+										// .replace(/:value="/g, ':model-value="')
+										// .replace(/@input="/g, '@update:model-value="')
+										// .replace(/\$attrs\.value/g, `$attrs.modelValue`);
 								} else {
 									if (temp.functional) {
 										if (temp.computed)
 											Object.keys(temp.computed).forEach(key => {
-												let func = temp.computed[key].toString();
+												let func = temp.computed[key]
+													.toString()
+													.replace(/this\.\$attrs\./g, 'data.attrs.')
+													.replace(/this\.\$props\./g, 'props.');
 												html = html.replace(regexp(key, 'gm'), (func.startsWith('function') ? '(' : '(function ') + func + ')()');
 											});
 
@@ -367,6 +437,16 @@ const test = VueCompiler.Vue.defineAsyncComponent(() => new Promise((resolve, re
 								}
 
 								temp.mixins = context.mixins;
+							}
+
+							if (temp.render && context.ver == 3) {
+								let fn = temp.render.toString();
+								let match = /render\s*(?::\s*(?:function\s*)*)*\(\s*(\w+)\s*(?:,\s*(\w+)\s*)?(?:,\s*(\w+)\s*)?\)\s*(=>\s*)*\{/.exec(fn);
+								if (match) {
+									let args = match.slice(1).filter(arg => arg);
+									func = fn.substring(fn.indexOf('{') + 1, fn.lastIndexOf('}') - 1);
+									temp.render = Function(...args, `${match[1]} = VueCompiler.vue2.createElement;\n` + (temp.functional && match[2] ? `${match[2]} = this;\n` : '') + func + '//# sourceURL=' + name + '.js');
+								}
 							}
 
 							if (VueCompiler.settings.cache) {
@@ -460,7 +540,7 @@ const test = VueCompiler.Vue.defineAsyncComponent(() => new Promise((resolve, re
 			var app = null;
 
 			let plugins = Array.isArray(options.use) ? options.use : options.use ? [ options.use ] : [];
-			if (this.Vue.component) {
+			if (this.Vue./*component*/version < '3.0') {
 				plugins.forEach(plugin => this.Vue.use(plugin));
 
 				if (components)
@@ -473,6 +553,23 @@ const test = VueCompiler.Vue.defineAsyncComponent(() => new Promise((resolve, re
 						? options
 						: Object.assign({}, options, { data: function () { return options.data; } })
 				);
+
+				this.Vue.component = (name, component) => {
+					if (app && app._context && app._context.components && app._context.components[name])
+						return name;
+
+					app.component(name, component);
+					return name;
+				};
+				this.Vue.set = this.vue2.mixin.methods.$set;
+				this.Vue.delete = this.vue2.mixin.methods.$delete;
+				this.Vue.extend = () => console.error('extend() deleted in Vue 3.', arguments);
+				this.Vue.directive = app.directive;//() => console.error('directive() deleted in Vue 3.', arguments);
+				this.Vue.filter = () => console.error('filter() deleted in Vue 3.', arguments);
+				this.Vue.use = () => app.use; //console.error('use() deleted in Vue 3.', arguments);
+				this.Vue.mixin = () => app.mixin;//console.error('mixin() deleted in Vue 3.', arguments);
+				this.Vue.compile = () => console.error('compile() deleted in Vue 3.', arguments);
+				this.Vue.observable = () => console.error('observable() deleted in Vue 3.', arguments);
 
 				plugins.forEach(plugin => app.use(plugin));
 

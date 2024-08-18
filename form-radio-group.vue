@@ -10,7 +10,7 @@
 			class="form-check custom-control custom-radio"
 			:class="{ 'form-check-inline custom-control-inline': props.inline !== undefined && props.inline !== false }"
 
-			v-for="(option, i) in (Array.isArray(props.options) ? props.options : Object.keys(props.options))"
+			v-for="(option, i) in (Array.isArray(props.options) ? props.options : Object.keys(props.options || {}))"
 			:key="i"
 		>
 			<input

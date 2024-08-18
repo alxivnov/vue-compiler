@@ -47,6 +47,12 @@
 					'active': page == 'page-test'
 				}" href="#" @click.prevent="page = 'page-test'">Test</a>
 			</li>
+			<li class="nav-item">
+				<a :class="{
+					'nav-link': true,
+					'active': page == 'page-rest'
+				}" href="#" @click.prevent="page = 'page-rest'">Rest</a>
+			</li>
 		</ul>
 
 		<component :is="page"></component>
@@ -99,7 +105,10 @@
 			'page-card.vue',
 
 			'./junk/page-junk.vue',
-			'./junk/page-test.vue'
+			'./junk/page-test.vue',
+			'./junk/page-rest.vue',
+
+			'./junk/with-wrapper.vue',
 		];
 
 		let opts = {

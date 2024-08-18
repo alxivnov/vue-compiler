@@ -66,7 +66,7 @@
 		>
 			<slot name="options">
 			</slot>
-			<slot name="option" v-for="(option, i) in (Array.isArray(props.options) ? props.options : Object.keys(props.options))" :option="option">
+			<slot name="option" v-for="(option, i) in (Array.isArray(props.options) ? props.options : Object.keys(props.options || {}))" :option="option">
 				<option
 					:key="i"
 

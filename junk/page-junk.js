@@ -18,7 +18,7 @@ const func = (resolve, reject) => {
 		template: '<h1>TEST</h1>'
 	});
 };
-const test = Vue.component
+const test = Vue.version < '3.0' && Vue.component
 	? func
 	: Vue.defineAsyncComponent(() => new Promise(func));
 
@@ -43,7 +43,9 @@ export default {
 
 		'import-from': ImportFrom,
 		'import-func': ImportFunc,
-		'test': test
+		'test': test,
+
+		'score-badge': () => import('./score-badge.vue'),
 	},
 	props: [
 		'prop'

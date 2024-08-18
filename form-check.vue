@@ -7,13 +7,13 @@
 		<div :class="[
 
 			'form-check',
-			props.switch ? 'form-switch' : null,
+			props.formSwitch ? 'form-switch' : null,
 			props.inline ? 'form-check-inline' : null,
 
 			'custom-control',
 			props.type == 'radio'
 				? 'custom-radio'
-				: props.switch
+				: props.formSwitch
 					? 'custom-switch'
 					: 'custom-checkbox',
 			props.inline ? 'custom-control-inline' : null,
@@ -29,17 +29,17 @@
 				v-bind="{
 					...data.attrs,
 
-//				Vue 3
-				...(data.attrs
-					? data.attrs.modelValue !== undefined
-						? {
-							checked: props.type == 'radio' ? (data.attrs.modelValue == (data.attrs.value || props.htmlValue)) : data.attrs.modelValue,
-							onChange: $event => $emit('update:modelValue', props.type == 'radio' ? (data.attrs.value || props.htmlValue) : $event.target.checked)
-						}
-						: {
-							checked: props.type == 'radio' ? (data.model.value == props.htmlValue) : data.attrs.value
-						}
-					: {})
+//					Vue 3
+					...(data.attrs
+						? data.attrs.modelValue !== undefined
+							? {
+								checked: props.type == 'radio' ? (data.attrs.modelValue == (data.attrs.value || props.htmlValue)) : data.attrs.modelValue,
+								onChange: $event => $emit('update:modelValue', props.type == 'radio' ? (data.attrs.value || props.htmlValue) : $event.target.checked)
+							}
+							: {
+								checked: props.type == 'radio' ? (data.model.value == props.htmlValue) : data.attrs.value
+							}
+						: {})
 				}"
 
 				v-on="{
@@ -80,7 +80,7 @@ export default {
 
 		'inline',	// FALSE|true
 
-		'switch'	// FALSE|true
+		'form-switch'	// FALSE|true
 	]
 
 	//	disabled

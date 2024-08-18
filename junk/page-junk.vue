@@ -12,6 +12,18 @@
 			</modal>
 		</tr>
 		<tr>
+			<td>
+				<with-wrapper :if="true">
+					<score-badge :value="50" />
+				</with-wrapper>
+			</td>
+			<td>
+				<with-wrapper :if="false">
+					<score-badge :value="99" />
+				</with-wrapper>
+			</td>
+		</tr>
+		<tr>
 			<test />
 		</tr>
 		<tr>
