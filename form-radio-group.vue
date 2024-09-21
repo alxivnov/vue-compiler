@@ -13,12 +13,11 @@
 			v-for="(option, i) in (Array.isArray(props.options) ? props.options : Object.keys(props.options || {}))"
 			:key="i"
 		>
-			<input
+			<input :value="Array.isArray(props.options) ? i : option"
 				class="form-check-input custom-control-input"
 				type="radio"
 				:name="data.attrs && (data.attrs.name || data.attrs.id) || data.model && data.model.expression || 'radio'"
 				:id="(data.attrs && (data.attrs.name || data.attrs.id) || data.model && data.model.expression || 'radio') + '-' + i"
-				:value="Array.isArray(props.options) ? i : option"
 
 				v-bind="{
 					...data.attrs,

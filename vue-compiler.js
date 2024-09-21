@@ -65,6 +65,8 @@ const VueCompiler = (function () {
 		},
 
 		vue2: {
+			// emitter: typeof (TinyEmitter) == 'function' ? new TinyEmitter() : undefined,
+
 			listeners(attrs) {
 				return Object.keys(attrs)
 					.filter((key) => key.startsWith('on') && typeof (attrs[key]) == 'function')
@@ -90,6 +92,10 @@ const VueCompiler = (function () {
 				computed: {
 					$listeners() {
 						return VueCompiler.vue2.listeners(this.$attrs || {});
+					},
+					_uid() {
+						return this.$ && this.$.uid
+							|| this._ && this._.uid;
 					}
 				},
 				methods: {
@@ -130,6 +136,24 @@ const VueCompiler = (function () {
 			return regexp(pattern, 'gm');
 		},
 
+
+		tryCall(fn, message) {
+			// return fn;
+			if (typeof (fn) == 'function') {
+				return function (...args) {
+					try {
+						return fn.call(this, ...args);
+					} catch (err) {
+						console.error(message, err);
+
+						throw err;
+					}
+				}
+			} else {
+				return fn;
+			}
+		},
+
 		scopedSlot: function (fn) {
 			var start = -1;
 			while ((start = fn.indexOf('_t')) > -1) {
@@ -155,23 +179,34 @@ const VueCompiler = (function () {
 
 		global: {},
 
+		componentName(url, camel) {
+			var name = url
+				.split('/')
+				.slice(-1)[0]
+			name = name.includes('.')
+				? name
+					.split('.')
+					.slice(0, -1)
+				: [name];
+			name = name
+				.flatMap(function (el) {
+					return el.split(/[-_]/);
+				})
+				.map(function (el) {
+					let val = el.replace(VueCompiler.regexp.name, '-');
+					return camel ? val.slice(0, 1).toUpperCase() + val.slice(1) : val;
+				})
+				.join(camel ? '' : '-');
+			return name;
+		},
+
 	import: function (components, mixins) {
 		if (typeof (components) == 'string')
 			components = [components];
 
 		if (Array.isArray(components))
 			components = components.reduce(function (prev, curr) {
-				let name = curr
-					.split('/')
-					.slice(-1)[0]
-				name = !name.includes('.') ? [name] : name
-					.split('.')
-					.slice(0, -1)
-				name = name
-					.map(function (el) {
-						return el.replace(VueCompiler.regexp.name, '-');
-					})
-					.join('-');
+				let name = VueCompiler.componentName(curr);
 				prev[name] = curr;
 				return prev;
 			}, {});
@@ -337,8 +372,8 @@ const test = VueCompiler.Vue.defineAsyncComponent(() => new Promise((resolve, re
 					defs: {},
 					mixins: ver == 3
 						? [
+							VueCompiler.vue2.mixin,
 							...(mixins || []),
-							VueCompiler.vue2.mixin
 						]
 						: mixins,
 					ver,
@@ -347,17 +382,28 @@ const test = VueCompiler.Vue.defineAsyncComponent(() => new Promise((resolve, re
 				if (hasScript) {
 					var replaceValue = 'VueCompiler.download(VueCompiler.absolute($2, \'' + absoluteURL + '\'), context.mixins, context.thisArg)';
 
-					if (ctx.ver == 3)
-						replaceValue = 'VueCompiler.Vue.defineAsyncComponent(function () { return ' + replaceValue + '; })';
-					else
+					// if (ctx.ver == 3)
+					// 	replaceValue = 'VueCompiler.Vue.defineAsyncComponent(function () { return ' + replaceValue + '; })';
+					// else
 						replaceValue = '$1' + replaceValue;
 
 					ctx.init = script.init.replace(VueCompiler.regexp.absolute, replaceValue);
 					ctx.main = script.main.replace(VueCompiler.regexp.absolute, replaceValue);
 
+					if (ctx.ver == 3)
+						ctx.main = ctx.main.replace(/\$emit\('input',/g, `$emit('update:modelValue',`);
+
 					asyncImps.forEach(function (imp) {
 						let asyncURL = VueCompiler.absolute(imp[2], absoluteURL);
-						var asyncReplace = 'function () { return VueCompiler.download(\'' + asyncURL + '\', context.mixins, context.thisArg); }';
+						var asyncReplace = 'function () {'
+							// + 'try {'
+							+ 'return VueCompiler.download(\''
+							+ asyncURL
+							+ '\', context.mixins, context.thisArg);'
+							// + ' } catch (err) { console.log("'
+							// + asyncURL
+							// + '", err); throw err; }'
+							+ '}';
 						if (ctx.ver == 3)
 							asyncReplace = 'VueCompiler.Vue.defineAsyncComponent(' + asyncReplace + ')';
 						asyncReplace = 'VueCompiler.global[\'' + asyncURL + '\'] || ' + asyncReplace;
@@ -378,9 +424,18 @@ const test = VueCompiler.Vue.defineAsyncComponent(() => new Promise((resolve, re
 						let esm = typeof (Vue) == 'undefined'
 							? '\nconst Vue = VueCompiler.Vue;'
 							: '';
-						let name = absoluteURL.split('/').slice(-1)[0].split('.').slice(0, -1).join('') || 'VueCompiler.js';
+						let name = VueCompiler.componentName(absoluteURL) || 'VueCompiler.js';
 						var func = context.main
-							? '"use strict";' + esm + (context.init || '') + 'return(' + (context.main.replace(/[\s;]+$/, '') || '{}') + ')'
+							? '"use strict";'
+								// + '\ntry {'
+								+ esm
+								+ (context.init || '')
+								+ 'return('
+								+ (context.main.replace(/[\s;]+$/, '') || '{}')
+								+ ')'
+								// + '\n} catch (err) { console.error("'
+								// + name
+								// + '", err); throw err; }'
 							: null;
 						try {
 //							let func = '(function(){' + context.init + 'return ' + context.main + '})';
@@ -405,9 +460,12 @@ const test = VueCompiler.Vue.defineAsyncComponent(() => new Promise((resolve, re
 											.replace(/\$scopedSlots/g, '$slots')
 										: html
 											.replace(/\$scopedSlots(.(\w+)|\[.+])/g, '$slots$1');
-									// temp.template = temp.template
-										// .replace(/:value="/g, ':model-value="')
-										// .replace(/@input="/g, '@update:model-value="')
+									temp.template = temp.template
+										.replace(/@hook:(\w+)="/g, '@vue:$1="')
+										.replace(/:value="/g, ':model-value="')
+										.replace(/<(input|textarea|select|option.+):model-value="/g, '<$1:value="')
+										.replace(/@input="/g, '@update:model-value="')
+										// .replace(/:value="(.+)"\s+@input="(.+)"/g, ':model-value="$1" @update:model-value="$2"')
 										// .replace(/\$attrs\.value/g, `$attrs.modelValue`);
 								} else {
 									if (temp.functional) {
@@ -416,7 +474,8 @@ const test = VueCompiler.Vue.defineAsyncComponent(() => new Promise((resolve, re
 												let func = temp.computed[key]
 													.toString()
 													.replace(/this\.\$attrs\./g, 'data.attrs.')
-													.replace(/this\.\$props\./g, 'props.');
+													.replace(/this\.\$props\./g, 'props.')
+													.replace(/this\./g, 'props.');
 												html = html.replace(regexp(key, 'gm'), (func.startsWith('function') ? '(' : '(function ') + func + ')()');
 											});
 
@@ -439,15 +498,52 @@ const test = VueCompiler.Vue.defineAsyncComponent(() => new Promise((resolve, re
 								temp.mixins = context.mixins;
 							}
 
-							if (temp.render && context.ver == 3) {
-								let fn = temp.render.toString();
-								let match = /render\s*(?::\s*(?:function\s*)*)*\(\s*(\w+)\s*(?:,\s*(\w+)\s*)?(?:,\s*(\w+)\s*)?\)\s*(=>\s*)*\{/.exec(fn);
-								if (match) {
-									let args = match.slice(1).filter(arg => arg);
-									func = fn.substring(fn.indexOf('{') + 1, fn.lastIndexOf('}') - 1);
-									temp.render = Function(...args, `${match[1]} = VueCompiler.vue2.createElement;\n` + (temp.functional && match[2] ? `${match[2]} = this;\n` : '') + func + '//# sourceURL=' + name + '.js');
+							if (context.ver == 3) {
+								if (temp.render) {
+									let fn = temp.render.toString();
+									let match = /render\s*(?::\s*(?:function\s*)*)*\(\s*(\w+)\s*(?:,\s*(\w+)\s*)?(?:,\s*(\w+)\s*)?\)\s*(=>\s*)*\{/.exec(fn);
+									if (match) {
+										let args = match.slice(1).filter(arg => arg);
+										func = fn.substring(fn.indexOf('{') + 1, fn.lastIndexOf('}') - 1);
+										temp.render = Function(...args, `${match[1]} = VueCompiler.vue2.createElement;\n` + (temp.functional && match[2] ? `${match[2]} = this;\n` : '') + func + '//# sourceURL=' + name + '.js');
+									}
+								}
+
+								if (typeof (temp.components) == 'object') {
+									Object.keys(temp.components)
+										.filter(comp => typeof (temp.components[comp]) == 'function' && comp.name != 'AsyncComponentWrapper')
+										.forEach(comp => {
+											let from = temp.components[comp];
+											let to = VueCompiler.Vue.defineAsyncComponent(from);
+											temp.components[comp] = to;
+										});
+								}
+
+								if (Array.isArray(temp.props) && temp.props.includes('value')
+									|| temp.props && typeof (temp.props) == 'object' && temp.props.value) {
+									if (Array.isArray(temp.props)) {
+										temp.props.splice(temp.props.indexOf('value'), 1, 'modelValue');
+									} else {
+										temp.props.modelValue = temp.props.value;
+										delete temp.props.value;
+									}
+
+									let value = function () {
+										return this.modelValue || this.$attrs.value;
+									};
+
+									if (temp.computed) {
+										temp.computed.value = value;
+									} else {
+										temp.computed = { value };
+									}
 								}
 							}
+
+							if (typeof (temp.data) == 'function')
+								temp.data = VueCompiler.tryCall(temp.data, name);
+							if (typeof (temp.mounted) == 'function')
+								temp.mounted = VueCompiler.tryCall(temp.mounted, name);
 
 							if (VueCompiler.settings.cache) {
 								VueCompiler.cache[absoluteURL] = {
@@ -478,16 +574,7 @@ const test = VueCompiler.Vue.defineAsyncComponent(() => new Promise((resolve, re
 						return VueCompiler.download(impURL, context.mixins, context.thisArg).then(function (def) {
 							if (def instanceof Object || def == null) {
 								context.defs[impURL] = def;
-								let name = imp[1] || imp[2]
-									.split('/')
-									.slice(-1)[0]
-									.split('.')
-									.slice(0, -1)[0]
-									.split('-')
-									.map(function (s, i) {
-										return /*i > 0 ?*/ s.slice(0, 1).toUpperCase() + s.slice(1) /*: s*/;
-									})
-									.join('');
+								let name = imp[1] || VueCompiler.componentName(imp[2], true);
 								//
 //								console.log('def', imp, name, def);
 								def = 'let ' + name + ' = context.defs[\'' + impURL + '\'];';
@@ -555,10 +642,14 @@ const test = VueCompiler.Vue.defineAsyncComponent(() => new Promise((resolve, re
 				);
 
 				this.Vue.component = (name, component) => {
-					if (app && app._context && app._context.components && app._context.components[name])
+					let components = app && app._context && app._context.components || {};
+					if (components[name])
 						return name;
 
-					app.component(name, component);
+					if (typeof (component) == 'function')
+						components[name] = this.Vue.defineAsyncComponent(component);
+					else
+						app.component(name, component);
 					return name;
 				};
 				this.Vue.set = this.vue2.mixin.methods.$set;

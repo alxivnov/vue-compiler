@@ -67,10 +67,9 @@
 			<slot name="options">
 			</slot>
 			<slot name="option" v-for="(option, i) in (Array.isArray(props.options) ? props.options : Object.keys(props.options || {}))" :option="option">
-				<option
+				<option :value="option"
 					:key="i"
 
-					:value="option"
 					:selected="(data.model && option == data.model.value) || (data.attrs && option == data.attrs.modelValue)"
 				>
 					{{ Array.isArray(props.options) ? option : props.options[option] }}
