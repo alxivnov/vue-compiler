@@ -1,5 +1,6 @@
 <template>
 	<table>
+		<tbody>
 		<tr>
 			<btn @click.prevent="click">btn</btn>
 
@@ -22,6 +23,9 @@
 					<score-badge :value="99" />
 				</with-wrapper>
 			</td>
+			<td>
+				<composition-api></composition-api>
+			</td>
 		</tr>
 		<tr>
 			<test />
@@ -33,10 +37,15 @@
 			<import-func />
 		</tr>
 		<tr>
+			<td>
 			<form-input v-model="vInput">form-input:</form-input>
+			</td>
+			<td>
 			<span>{{ vInput }}</span>
+			</td>
 		</tr>
 		<tr>
+			<td>
 			<form-select v-model="vSelect" :options="{ '5th' : 'Fifth', '6th': 'Sixth', '7th': 'Seventh' }">
 				form-select:
 				<template #options>
@@ -51,15 +60,23 @@
 					</option>
 				</template> -->
 			</form-select>
+			</td>
+			<td>
 			<span>{{ vSelect }}</span>
+			</td>
 		</tr>
 		<tr>
+			<td>
 			<form-check v-model="vCheck">
 				form-check
 			</form-check>
+			</td>
+			<td>
 			<span>{{ vCheck }}</span>
+			</td>
 		</tr>
 		<tr>
+			<td>
 			<form-radio-group v-model="vRadio" name="vRadioInline" :options="{ '1st': 'form-check 1', '2nd': 'form-check 2' }" inline>
 				Inline
 			</form-radio-group>
@@ -68,13 +85,20 @@
 					{{ option }} form-check
 				</template>
 			</form-radio-group>
+			</td>
+			<td>
 			<span>{{ vRadio }}</span>
+			</td>
 		</tr>
 		<tr>
+			<td>
 			<form-input type="file" @change="file">
 				{{ 'Select file' }}
 			</form-input>
+			</td>
+			<td>
 			<span>{{ vFile }}</span>
+			</td>
 		</tr>
 		<tr>
 			{{ expDef.text }}
@@ -90,6 +114,7 @@
 				{{ val }}
 			</td>
 		</tr>
+	</tbody>
 	</table>
 </template>
 

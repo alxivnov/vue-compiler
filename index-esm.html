@@ -78,13 +78,19 @@
 		}
 	</script>
 	<script type="module">
-		import {
-			createApp,
-			compile,
-			defineAsyncComponent,
-			h,
-			markRaw,
-		} from 'vue';
+		let query = [...new URL(window.location).searchParams.entries()]
+			.reduce((query, [key, val]) => ({
+				...query,
+				[key]: Array.isArray(query[key])
+					? [...query[key], val]
+					: query[key]
+						? [query[key], val]
+						: val === ''
+							? true
+							: val
+			}), {});
+
+		import * as Vue from 'vue';
 
 		let comp = [
 			'btn-group.vue',
@@ -114,19 +120,15 @@
 		let opts = {
 			el: '#app',
 			data: {
-				page: 'page-code',
+				page: query.page
+					? 'page-' + query.page
+					: 'page-code',
 			}
 		};
 
 
 
-		VueCompiler.createApp(opts, comp, { cache: true, async: /\.vue$|(?:^|\/)vue\//g, Vue: {
-			compile,
-			createApp,
-			defineAsyncComponent,
-			h,
-			markRaw,
-		} });
+		VueCompiler.createApp(opts, comp, { cache: true, async: /\.vue$|(?:^|\/)vue\//g, Vue });
 	</script>
 </body>
 </html>

@@ -1,6 +1,6 @@
 <template>
 	 <div class="col">
-		<btn @click.prevent="setup">Load</btn>
+		<btn @click.prevent="setupComponents">Load</btn>
 		<component v-for="(c, i) in Object.keys(components)" :key="i" class="row" :is="components[`test-${i + 1}`]" v-bind="pp" />
 	 </div>
 </template>
@@ -17,7 +17,7 @@ export default {
 
 	},
 	methods: {
-		setup() {
+		setupComponents() {
 			let path = '/junk/:name.vue';
 //			let path = '/dnsintegration/vue/:name'
 			console.log('load');
@@ -27,20 +27,22 @@ export default {
 				{ $comp: { url: path.replace(':name', 'test-3') } }
 			];
 
-			this.components = comps
+			comps = comps
 				.reduce((comp, def) => {
 					let url = def.$comp.url || def.$comp;
 					let key = url.split('/').slice(-1)[0].split('.')[0];
 					console.log(key);
 					if (!comp[key])
-						comp[key] = () => import(url);
+						comp[key] = Vue.component(key, () => import(url));
 
-					return typeof (Vue.markRaw) == 'function'
-						// Vue 3
-						? Vue.markRaw(comp)
-						// Vue 2
-						: comp;
+					return comp;
 				}, { /*markRaw: true*/ });
+			console.log('loaded', comps);
+			this.components = typeof (Vue.markRaw) == 'function'
+				// Vue 3
+				? Vue.markRaw(comps)
+				// Vue 2
+				:comps
 			// .reduce((prev, curr) => {
 			// 	prev[curr.url] = () => import(`/junk/${curr.url}.vue`);
 			// 	return prev;

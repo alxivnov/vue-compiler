@@ -45,7 +45,8 @@ export default {
 		'import-func': ImportFunc,
 		'test': test,
 
-		'score-badge': () => import('./score-badge.vue'),
+		ScoreBadge: () => import('./score-badge.vue'),
+		'composition-api': () => import('./composition-api.vue'),
 	},
 	props: [
 		'prop'

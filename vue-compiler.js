@@ -49,7 +49,7 @@ const VueCompiler = (function () {
 			slot: regexp('_t\\("([^"]+?)"\\)', 'g'),
 			src: regexp('<(template|script)[ ]*src=(?:\'|"|`)([^\'"`]*)(?:\'|"|`).*>', 'gs'),
 			template: regexp('<template([^>]*)>(.*)<\/template>', 'gs'),
-			script: regexp('<script([^>]*)>(.*?)(?:export\\s+default|module.exports\\s+=)\\s+(.*)<\/script>', 'gs'),
+			script: regexp('<script([^>]*)>(.*?)(export\\s+default|module\.exports\\s+=|import\\s+([\\w\\s{},]+)\\s+from\\s+\'vue\')\\s+(.*)<\/script>', 'gs'),
 			export: regexp('(.*?)(?:export\\s+default|module.exports\\s+=)\\s+(.*)', 'gms'),
 			import: regexp('(?:^)\\s*(?:await\s+)?import(?:\\s+([^\'"`].*?)\\s+from\\s+|\\s+)(?:\'|"|`)(.*?)(?:\'|"|`);?', 'gms'),//|\\r\\n
 //			awaitimport: regexp('(?:^)\\s*const\\s+([^\'"`].*?)\\s*=\\s*await\\s+import\\(\\s*(?:\'|"|`)(.*?)(?:\'|"|`)\\s*\\);?', 'gms'),//|\\r\\n
@@ -319,7 +319,7 @@ const test = VueCompiler.Vue.defineAsyncComponent(() => new Promise((resolve, re
 				let isHTML = /^\s*</.test(text);
 				var template = isHTML && VueCompiler.regexp.template.find(text, true);
 				var script = isHTML && VueCompiler.regexp.script.find(text, true);
-				script = !!script && script.length > 3 ? { attr: script[1], init: script[2], main: script[3] } : null;
+				script = !!script && script.length > 3 ? { attr: script[1], init: script[2], comp: script[4], main: script[5] } : null;
 				//
 //				console.log('vue_component_definition', url, template, script);
 				if (!template && !script) {
@@ -389,6 +389,8 @@ const test = VueCompiler.Vue.defineAsyncComponent(() => new Promise((resolve, re
 
 					ctx.init = script.init.replace(VueCompiler.regexp.absolute, replaceValue);
 					ctx.main = script.main.replace(VueCompiler.regexp.absolute, replaceValue);
+					ctx.attr = script.attr;
+					ctx.comp = script.comp;
 
 					if (ctx.ver == 3)
 						ctx.main = ctx.main.replace(/\$emit\('input',/g, `$emit('update:modelValue',`);
@@ -421,8 +423,9 @@ const test = VueCompiler.Vue.defineAsyncComponent(() => new Promise((resolve, re
 					return new Promise(function (resolve, reject) {
 						//
 //						console.log(/*'js', url, js, script, */context);
-						let esm = typeof (Vue) == 'undefined'
-							? '\nconst Vue = VueCompiler.Vue;'
+						let setup = context.attr && context.attr.includes('setup');
+						let esm = setup || context.comp || typeof (Vue) == 'undefined'
+							? '\nconst ' + (context.comp || 'Vue') + ' = VueCompiler.Vue;'
 							: '';
 						let name = VueCompiler.componentName(absoluteURL) || 'VueCompiler.js';
 						var func = context.main
@@ -431,12 +434,26 @@ const test = VueCompiler.Vue.defineAsyncComponent(() => new Promise((resolve, re
 								+ esm
 								+ (context.init || '')
 								+ 'return('
+								+ (setup
+									? '{setup(){\n' + '\nconst ' + (context.comp || 'Vue') + ' = VueCompiler.Vue;'
+									: '')
 								+ (context.main.replace(/[\s;]+$/, '') || '{}')
+								+ (setup
+									? '\nreturn{'
+										+ /^(?:const|let|var|(function))\s+(\w+)/gm
+											.findAll(context.main)
+											.map(prop => prop[2])
+											.join(',')
+										+ '}}}'
+									: '')
 								+ ')'
 								// + '\n} catch (err) { console.error("'
 								// + name
 								// + '", err); throw err; }'
 							: null;
+						if (name == 'composition-api') {
+							console.log('comp', func);
+						}
 						try {
 //							let func = '(function(){' + context.init + 'return ' + context.main + '})';
 //							let temp = context.main ? eval(func + '//# sourceURL=' + name)() : {};
@@ -621,7 +638,9 @@ const test = VueCompiler.Vue.defineAsyncComponent(() => new Promise((resolve, re
 			Object.assign(this.settings, settings);
 
 			this.Vue = typeof (Vue) == 'undefined'
-				? settings.Vue
+				? settings.Vue && settings.Vue[Symbol.toStringTag] == 'Module'
+					? { ...settings.Vue }
+					: settings.Vue
 				: Vue;
 
 			var app = null;

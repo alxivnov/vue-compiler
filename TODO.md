@@ -1,6 +1,8 @@
 - [x] `await import`
 - [x] ESM
 - [x] Test page
-- [ ] import/extends/function
-- [ ] Composition API
-- [ ] Vapor Mode
+- [x] Vapor Mode
+- [x] Composition API / import ... from 'vue' / import Vue from 'vue'
+- [ ] () => import() name
+- [ ] URL base + /bundle/:comp
+- [ ] import/extends/function - Extends. Async

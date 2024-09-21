@@ -72,6 +72,18 @@
 	<script src="./vue-compiler.js"></script>
 
 	<script>
+		let query = [...new URL(window.location).searchParams.entries()]
+			.reduce((query, [key, val]) => ({
+				...query,
+				[key]: Array.isArray(query[key])
+					? [...query[key], val]
+					: query[key]
+						? [query[key], val]
+						: val === ''
+							? true
+							: val
+			}), {});
+
 		let comp = [
 			'btn-group.vue',
 			'btn.vue',
@@ -100,7 +112,9 @@
 		let opts = {
 			el: '#app',
 			data: {
-				page: 'page-code',
+				page: query.page
+					? 'page-' + query.page
+					: 'page-code',
 			}
 		};
 
