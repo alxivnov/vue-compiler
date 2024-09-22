@@ -18,7 +18,9 @@ export default {
 	},
 	methods: {
 		setupComponents() {
-			let path = '/junk/:name.vue';
+			let path = './:name.vue';
+			// let path = '/junk/:name.vue';
+			// let path = 'http://alxivnov.github.io/vue-compiler/junk/:name.vue';
 //			let path = '/dnsintegration/vue/:name'
 			console.log('load');
 			let comps = [
@@ -26,6 +28,7 @@ export default {
 				{ $comp: { url: path.replace(':name', 'test-2') } },
 				{ $comp: { url: path.replace(':name', 'test-3') } }
 			];
+			console.log('load', comps);
 
 			comps = comps
 				.reduce((comp, def) => {
