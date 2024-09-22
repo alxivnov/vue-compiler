@@ -451,9 +451,9 @@ const test = VueCompiler.Vue.defineAsyncComponent(() => new Promise((resolve, re
 								// + name
 								// + '", err); throw err; }'
 							: null;
-						if (name == 'composition-api') {
-							console.log('comp', func);
-						}
+						// if (name == 'page-test') {
+						// 	console.log('comp', name, absoluteURL, func);
+						// }
 						try {
 //							let func = '(function(){' + context.init + 'return ' + context.main + '})';
 //							let temp = context.main ? eval(func + '//# sourceURL=' + name)() : {};
