@@ -2,6 +2,14 @@
 	<table>
 		<tbody>
 		<tr>
+			<td>
+				<extends-js></extends-js>
+			</td>
+			<td>
+				<extends-vue></extends-vue>
+			</td>
+		</tr>
+		<tr>
 			<btn @click.prevent="click">btn</btn>
 
 			<modal id="modal" title="Modal" scrollable centered fade @shown="shown" @hidden="hidden">

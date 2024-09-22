@@ -225,12 +225,12 @@ const test = VueCompiler.Vue.defineAsyncComponent(() => new Promise((resolve, re
 				let url = VueCompiler.absolute(components[name], document.baseURI);
 
 				let comp = function (name, url, def) {
-				if (name.startsWith('Base'))
-					def.then(function (def) {
-						VueCompiler.global[url] = def;
-					}).catch(function (err) {
-						delete VueCompiler.global[url];
-					});
+				// if (name.startsWith('Base'))
+				// 	def.then(function (def) {
+				// 		VueCompiler.global[url] = def;
+				// 	}).catch(function (err) {
+				// 		delete VueCompiler.global[url];
+				// 	});
 
 				if (VueCompiler.Vue/*component*/.version < '3.0')
 					VueCompiler.Vue.component(name, function (resolve, reject) {
@@ -353,15 +353,13 @@ const test = VueCompiler.Vue.defineAsyncComponent(() => new Promise((resolve, re
 				let asyncImps = [];
 				let syncImps = [];
 				imps.forEach(function (imp) {
-					if (VueCompiler.settings.async && imp[2].search(VueCompiler.settings.async) > -1)
+					if (VueCompiler.settings.async
+						&& (VueCompiler.settings.async === true || imp[2].search(VueCompiler.settings.async) > -1)
+						&& script.main.search(new RegExp('(?:,|{|^)\\s*extends:\\s*' + imp[1] + '\\s*(?:,|}|$)')) == -1)
 						asyncImps.push(imp);
 					else
 						syncImps.push(imp);
 				});
-				// TODO: extends
-				// if (imps.some(imp => imp[0].includes('/core/vue/base-dashboard-widget')) || asyncImps.length) {
-				// 	console.log(VueCompiler.settings.async, /*imps, */asyncImps/*, syncImps*/);
-				// }
 
 				let ver = VueCompiler.Vue./*component*/version < '3.0'
 					? 2
@@ -408,13 +406,9 @@ const test = VueCompiler.Vue.defineAsyncComponent(() => new Promise((resolve, re
 							+ '}';
 						if (ctx.ver == 3)
 							asyncReplace = 'VueCompiler.Vue.defineAsyncComponent(' + asyncReplace + ')';
-						asyncReplace = 'VueCompiler.global[\'' + asyncURL + '\'] || ' + asyncReplace;
+						// asyncReplace = 'VueCompiler.global[\'' + asyncURL + '\'] || ' + asyncReplace;
 
 						ctx.init = ctx.init.replace(imp[0], 'const ' + imp[1] + ' = ' + asyncReplace + ';');
-						// TDOD: extends
-						// if (imp[0].includes('/core/vue/base-dashboard-widget')) {
-						// 	console.log('asyncImps', 'const ' + imp[1] + ' = ' + asyncReplace + ';');
-						// }
 					});
 				}
 				//
@@ -425,11 +419,11 @@ const test = VueCompiler.Vue.defineAsyncComponent(() => new Promise((resolve, re
 //						console.log(/*'js', url, js, script, */context);
 						let setup = context.attr && context.attr.includes('setup');
 						let esm = setup || context.comp || typeof (Vue) == 'undefined'
-							? '\nconst ' + (context.comp || 'Vue') + ' = VueCompiler.Vue;'
+							? 'const ' + (context.comp || 'Vue') + ' = VueCompiler.Vue;\n'
 							: '';
 						let name = VueCompiler.componentName(absoluteURL) || 'VueCompiler.js';
 						var func = context.main
-							? '"use strict";'
+							? '"use strict";\n'
 								// + '\ntry {'
 								+ esm
 								+ (context.init || '')
@@ -451,7 +445,7 @@ const test = VueCompiler.Vue.defineAsyncComponent(() => new Promise((resolve, re
 								// + name
 								// + '", err); throw err; }'
 							: null;
-						// if (name == 'page-test') {
+						// if (name == 'extends-comp' || name == 'score-badge' || name == 'composition-api') {
 						// 	console.log('comp', name, absoluteURL, func);
 						// }
 						try {
@@ -596,9 +590,6 @@ const test = VueCompiler.Vue.defineAsyncComponent(() => new Promise((resolve, re
 //								console.log('def', imp, name, def);
 								def = 'let ' + name + ' = context.defs[\'' + impURL + '\'];';
 							}
-							// TODO: extends
-							// if (impURL.includes('/core/vue/base-dashboard-widget'))
-							// 	console.log('imp', absoluteURL, impURL, def);
 
 							context.init = context.init.replace(imp[0], def);
 

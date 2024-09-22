@@ -47,6 +47,9 @@ export default {
 
 		ScoreBadge: () => import('./score-badge.vue'),
 		'composition-api': () => import('./composition-api.vue'),
+
+		ExtendsJs: () => import('./extends-comp.js'),
+		ExtendsVue: () => import('./extends-comp.vue'),
 	},
 	props: [
 		'prop'
