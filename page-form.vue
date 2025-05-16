@@ -18,7 +18,7 @@
 </template>
 
 <script>
-import VueForm from '../vue-form.vue';
+import VueForm from './vue-form.vue';
 
 let schema = [
 	/*md*/`
