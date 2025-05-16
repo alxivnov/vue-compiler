@@ -7,9 +7,9 @@
 	<title>Vue Compiler: Vue 2 + BS 5</title>
 
 	<!-- <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/css/bootstrap.min.css" integrity="sha384-xOolHFLEh07PJGoPkLv1IbcEPTNtaed2xpHsD9ESMhqIYd0nLMwNLD69Npy4HI+N" crossorigin="anonymous"> -->
-	<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.6/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-4Q6Gf2aSP4eDXB8Miphtr37CMZZQ5oXLH2yaXMJ2w8e2ZtHTl7GptT4jmndRuHDT" crossorigin="anonymous">
 
-	<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+	<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.13.1/font/bootstrap-icons.min.css">
 	<!-- <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.8.2/css/all.css" integrity="sha384-oS3vJWv+0UjzBfQzYUhtDYW+Pj2yciDJxpsK1OYPAYjqT085Qq/1cq5FLXAZQ7Ay" crossorigin="anonymous"> -->
 </head>
 <body>
@@ -23,35 +23,11 @@
 			</template>
 		</navbar>
 		<ul class="nav nav-tabs my-3">
-			<li class="nav-item">
+			<li v-for="key in Object.keys(pages)" :key="key" class="nav-item">
 				<a :class="{
 					'nav-link': true,
-					'active': page == 'page-code'
-				}" href="#" @click.prevent="page = 'page-code'">Code</a>
-			</li>
-			<li class="nav-item">
-				<a :class="{
-					'nav-link': true,
-					'active': page == 'page-card'
-				}" href="#" @click.prevent="page = 'page-card'">Card</a>
-			</li>
-			<li class="nav-item">
-				<a :class="{
-					'nav-link': true,
-					'active': page == 'page-junk'
-				}" href="#" @click.prevent="page = 'page-junk'">Junk</a>
-			</li>
-			<li class="nav-item">
-				<a :class="{
-					'nav-link': true,
-					'active': page == 'page-test'
-				}" href="#" @click.prevent="page = 'page-test'">Test</a>
-			</li>
-			<li class="nav-item">
-				<a :class="{
-					'nav-link': true,
-					'active': page == 'page-rest'
-				}" href="#" @click.prevent="page = 'page-rest'">Rest</a>
+					'active': page == key
+				}" href="#" @click.prevent="page = key">{{ pages[key] }}</a>
 			</li>
 		</ul>
 
@@ -62,7 +38,7 @@
 	<script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.1/dist/umd/popper.min.js" integrity="sha384-9/reFTGAW83EW2RDu2S0VKaIzap3H66lZH81PoYlFhbGU+6BZp6G7niu735Sk7lN" crossorigin="anonymous"></script>
 	<script src="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/js/bootstrap.min.js" integrity="sha384-+sLIOodYLS7CIrQpBjl+C7nPvqq+FbNUBDunl/OZv93DB7Ln/533i8e/mZXLi/P+" crossorigin="anonymous"></script> -->
 
-	<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.6/dist/js/bootstrap.bundle.min.js" integrity="sha384-j1CDi7MgGQ12Z7Qab0qlWQ/Qqz24Gc6BM0thvEMVjHnfYGF0rmFCozFSxQBxwHKO" crossorigin="anonymous"></script>
 	<script src="https://cdn.jsdelivr.net/npm/masonry-layout@4.2.2/dist/masonry.pkgd.min.js" integrity="sha384-GNFwBvfVxBkLMJpYMOABq3c+d3KnQxudP/mGPkzpZSTYykLBNsZEnG2D9G/X/+7D" crossorigin="anonymous" async></script>
 
 	<script src="https://cdn.jsdelivr.net/npm/vue@2/dist/vue.js"></script>
@@ -100,6 +76,7 @@
 
 			'page-code.vue',
 			'page-card.vue',
+			'page-form.vue',
 
 			'./junk/page-junk.vue',
 			'./junk/page-test.vue',
@@ -112,6 +89,14 @@
 			el: '#app',
 			data() {
 				return {
+					pages: {
+						'page-code': 'Code',
+						'page-card': 'Card',
+						'page-junk': 'Junk',
+						'page-test': 'Test',
+						'page-rest': 'Rest',
+						'page-form': 'Form',
+					},
 					page: query.page
 						? 'page-' + query.page
 						: 'page-code',

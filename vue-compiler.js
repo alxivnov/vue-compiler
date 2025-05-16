@@ -474,7 +474,7 @@ const test = VueCompiler.Vue.defineAsyncComponent(() => new Promise((resolve, re
 									temp.template = temp.template
 										.replace(/@hook:(\w+)="/g, '@vue:$1="')
 										.replace(/:value="/g, ':model-value="')
-										.replace(/<(input|textarea|select|option.+):model-value="/g, '<$1:value="')
+										.replace(/<(input|textarea|select|option)([\s\S]*):model-value="/g, '<$1$2:value="')
 										.replace(/@input="/g, '@update:model-value="')
 										// .replace(/:value="(.+)"\s+@input="(.+)"/g, ':model-value="$1" @update:model-value="$2"')
 										// .replace(/\$attrs\.value/g, `$attrs.modelValue`);
