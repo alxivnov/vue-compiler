@@ -2,13 +2,13 @@
 	<div>
 		<div class="row">
 			<div class="col">
-				<VueForm v-model="json" _size="lg" :schema="schema" @submit="submit">
-				</VueForm>
+				<AnyForm v-model="json" _size="lg" :fields="fields" @submit="submit">
+				</AnyForm>
 			</div>
 			<div class="col">
-				<VueForm v-model="json" col="2" size="sm" readonly="plaintext">
+				<AnyForm v-model="json" col="2" size="sm" readonly="plaintext">
 					Readonly:
-				</VueForm>
+				</AnyForm>
 				<div class="mt-3">
 					<code><pre>{{ JSON.stringify(json, undefined, 4) }}</pre></code>
 				</div>
@@ -18,9 +18,9 @@
 </template>
 
 <script>
-import VueForm from './vue-form.vue';
+import AnyForm from '../any-form.vue';
 
-let schema = [
+let fields = [
 	/*md*/`
 ### Header 3
 
@@ -62,53 +62,69 @@ _This_ text __should__ appear *formatted* according **to** the [spec](https://da
 	{
 		key: 'prop_object',
 		type: 'object',
-		schema: [
-			[								// row
+		fields: [
+			[			// row
+				[		// col
+					{
+						key: 'prop_number',
+						type: 'number',
+						label: 'Number',
+						col: 2
+					},
+					{
+						key: 'prop_string',
+						type: 'string',
+						label: 'String',
+						col: true
+					},
+					{
+						key: 'prop_boolean',
+						type: 'boolean',
+						label: 'Boolean'
+					},
+				],
 				{
-					key: 'prop_number',
+					key: 'prop_null',
 					type: 'number',
-					label: 'Number',
-					col: 2
+					label: 'null'
 				},
 				{
-					key: 'prop_string',
-					type: 'string',
-					label: 'String',
-					col: true
-				},
-			],
-			{
-				key: 'prop_boolean',
-				type: 'boolean',
-				label: 'Boolean'
-			},
+					key: 'prop_undefined',
+					default: true,
+					label: 'undefined'
+				}
+			]
 		],
 	}
 ];
 
 export default {
 	components: {
-		VueForm
+		AnyForm
 	},
 	data() {
 		return {
-			json: {
+			json: undefined,
+			fields
+		};
+	},
+	mounted() {
+		setTimeout(() => {
+			this.json = {
 				prop_boolean: true,
 				prop_number: 234,
 				prop_string: '345',
 				prop_object: {
 					prop_number: 124,
-					prop_string: '124',
+					prop_string: '125',
 					prop_boolean: false,
+					prop_null: null,
+					prop_undefined: undefined,
 				},
 				prop_null: null,
 				prop_undefined: undefined,
-			},
-			schema
-		};
-	},
-	mounted() {
-
+			};
+		}, 100);
 	},
 	methods: {
 		submit() {

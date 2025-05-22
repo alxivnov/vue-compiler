@@ -1,5 +1,10 @@
 <template>
-	<div>
+	<!-- TODO: Replace with wrapper -->
+	<div
+		:class="{
+			'w-100': isRow,	// Required for row layout
+		}"
+	>
 
 	<a
 		v-if="$slots.default"
@@ -23,35 +28,38 @@
 	</a>
 
 	<component
-		:is="indent || isRow ? 'fieldset' : 'form'"
+		:is="indent || /*isRow*/layout ? 'fieldset' : 'form'"
 		class="collapse"
 		:class="{
+			'px-0': layout,
+
 			row: isRow,
 			show: !collapse
 		}"
 		:id="collapse_id"
 	>
 		<div
-			v-for="field in fields"
-			:key="field?.key"
+			v-for="field in normFields"
+			:key="field.key"
 			:class="{
 				[spacing]: !isRow,
 				col: isRow,
-				row: isCol && !(field?.type == 'object' && model[field.key]) && !(typeof (field) == 'string'),
+				row: isCol && !(field.type == 'object' && model[field.key]) && !(typeof (field) == 'string'),
 
 				'ps-3': indent
 			}"
 		>
-			<!-- TODO: Support mapping to multiple values or null / undefined in select -->
-			<template v-if="field?.select">
+			<template v-if="field.select">
 				<label
 					:for="field.id"
 					:class="isCol ? [`col-${col}`, resize('col-form-label')] : 'form-label'"
 				>
-					{{ field.label || field.key }}
+					{{ field.label }}
 				</label>
+				<!-- TODO: Test with col layout -->
 				<select
 					:id="field.id"
+					:name="field.name"
 					:class="resize('form-select')"
 					v-model="model[field.key]"
 					:disabled="disabled || readonly"
@@ -65,23 +73,27 @@
 					</option>
 				</select>
 			</template>
-			<template v-else-if="field?.type == 'boolean'">
+			<template v-else-if="field.type == 'boolean'">
 				<label
 					v-if="isCol"
 					:for="field.id"
 					:class="isCol ? [`col-${col}`, resize('col-form-label')] : 'form-label'"
 				>
-					{{ field.label || field.key }}
+					{{ field.label }}
 				</label>
+				<!-- TODO: Replace with wrapper -->
+				<div :class="{ col: isCol }">
+
 				<div
 					class="form-check"
 					:class="{
-						col: isCol,
+						// 'col': isCol,
 						[offset]: isCol
 					}"
 				>
 					<input
 						:id="field.id"
+						:name="field.name"
 						type="checkbox"
 						class="form-check-input"
 						v-model="model[field.key]"
@@ -92,36 +104,72 @@
 						:for="field.id"
 						class="form-check-label"
 					>
-						{{ field.label || field.key }}
+						{{ field.label }}
 					</label>
 				</div>
+
+				</div>
 			</template>
-			<template
-				v-else-if="field?.type == 'number' || field?.type == 'string'"
-			>
+			<template v-else-if="field.type == 'number' || field.type == 'string'">
 				<label
 					:for="field.id"
 					:class="isCol ? [`col-${col}`, resize('col-form-label')] : 'form-label'"
 				>
-					{{ field.label || field.key }}
+					{{ field.label }}
 				</label>
+				<!-- TODO: Replace with wrpapper -->
+				<div :class="{ col: isCol }">
+
 				<input
 					:id="field.id"
-					:type="field.type == 'string' ? 'text' : field.type"
+					:name="field.name"
+					:type="field.typeAttr"
 					:class="{
 						[resize('form-control')]: true,
-						col: isCol
+						// col: isCol
 					}"
-					:placeholder="field.placeholder || field.label || field.key"
+					:placeholder="field.placeholder"
 					v-model="model[field.key]"
 					:disabled="disabled"
 					:readonly="readonly"
 				>
+
+				</div>
 			</template>
-			<vue-form
-				v-else-if="field?.type == 'object' && model[field.key]"
+			<!--
+				TODO: Fix defaults on creation
+				TODO: Add support for textarea
+				TODO: Add support for functions/buttons
+				TODO: Add support for layout column sizes
+				TODO: Add support for object as fields
+				TODO: Remake REST in AnyForm/AnyPage
+				TODO: Add support for files
+				TODO: Add support for colors
+				TODO: Add support for arrays
+				TODO: Add support for custom components
+			-->
+			<template v-else-if="field.type == 'array'">
+				<div
+					v-for="(badge, i) in this.model[field.key] || []"
+					:key="i"
+					class="badge"
+				>
+					{{ badge }}
+				</div>
+			</template>
+			<component
+				v-else-if="field.comp"
+				:id="field.id"
+				:name="field.name"
+				:is="field.comp"
+				:props="field.props"
+				v-model="field.key"
+			>
+			</component>
+			<any-form
+				v-else-if="field.type == 'object' && model[field.key]"
 				v-model="model[field.key]"
-				:schema="field.schema"
+				:fields="field.fields"
 				:col="col"
 				:size="size"
 				:disabled="disabled"
@@ -130,21 +178,21 @@
 
 				:indent="(indent || 0) + 1"
 			>
-				{{ ' ' + (field.label || field.key) }}
-			</vue-form>
-			<vue-form
-				v-else-if="Array.isArray(field)"
-				v-model="model"
-				:schema="field"
-				col="auto"
+				{{ ' ' + field.label }}
+			</any-form>
+			<any-form
+				v-else-if="field.fields"
+				v-model="value"
+				:fields="field.fields"
+				:layout="layout == 'row' ? 'col' : 'row'"
 				:size="size"
 				:disabled="disabled"
 				:readonly="readonly"
 			>
-			</vue-form>
+			</any-form>
 			<div
-				v-else-if="typeof (field) == 'string'"
-				v-html="markdown(field)"
+				v-else-if="field.html"
+				v-html="field.html"
 			>
 			</div>
 		</div>
@@ -153,7 +201,7 @@
 			class="btn btn-primary"
 			:class="offset"
 			v-if="!indent && !readonly && ($listeners.submit || $attrs.onSubmit)"
-			@click.prevent="$emit('submit', this.data)"
+			@click.prevent="$emit('submit', value)"
 		>
 			Submit
 		</button>
@@ -163,13 +211,19 @@
 </template>
 
 <script>
+let flatten = (val) => {
+	return Array.isArray(val)
+		? val.flatMap(flatten)
+		: [val];
+};
+
 export default {
-	name: 'vue-form',
+	name: 'any-form',
 	props: {
 		// debug: Boolean,
 
 		value: [Object, Array],
-		schema: Array,
+		fields: [Object, Array],
 
 		col: [Number, String],
 		size: String,
@@ -177,13 +231,41 @@ export default {
 		readonly: [Boolean, String],
 		collapse: [Boolean, String],
 
+		layout: String,
 		indent: Number,
 	},
 	data() {
 		return {
-			_schema: null,
+			_normFields: null,
+			_normValue: null,
 
 			expanded: !this.collapse,
+
+			normProps: {
+				// key: (field) => undefined,
+				type: (field, value) => value == Boolean ? 'boolean'
+					: value == Number ? 'number'
+						: value == Object ? 'object'
+							: value == String ? 'string'
+								: field.default ? typeof (field.default)
+									: value,
+				default: (field) => field.type == 'boolean' ? false
+					: field.type == 'number' ? 0
+						: field.type == 'object' ? {}
+							: field.type == 'string' ? ''
+								: undefined,
+
+				id: (field) => field.key + '_' + (this._uid || this._.uid),
+				name: (field) => {
+					return field.key;
+				},
+				label: (field) => field.key,
+				placeholder: (field) => field.label || field.key,
+
+				typeAttr: (field) => field.type == 'string' ? 'text' : field.type,
+				// select: (field) => undefined,
+				// schema: (field) => undefined,
+			},
 		};
 	},
 	computed: {
@@ -191,7 +273,7 @@ export default {
 			return this.col && !this.isRow;
 		},
 		isRow() {
-			return this.col == 'auto';
+			return this.layout == 'row';
 		},
 		offset() {
 			return this.size == 'lg'
@@ -213,32 +295,44 @@ export default {
 				: undefined;
 		},
 
-		fields() {
-			if (this._schema) {
-				return this._schema;
+		normFields() {
+			if (!this._normFields && (this.fields || this.value)) {
+				let fields = this.fields
+					? this.fieldsMap(this.fields, this.normField)
+					: this.value
+						? Object.entries(this.value)
+							.filter(([key, val]) => val != null)
+							.map(([key, val]) => this.normField({ key, type: typeof (val) }))
+						: [];
+
+				this._normFields = fields;
 			}
 
-			this._schema = this.schema
-				? this.schema//.filter(field => field && field.key)
-				: this.value
-					? Object.keys(this.value).map((key) => {
-						let id = key + '_' + (this._uid || this._.uid);
-						let type = typeof (this.value[key]);
-						// let label = key;
-
-						return {
-							id,
-							key,
-							// label,
-							type,
-						};
-					})
-					: [];
-
-			return this._schema;
+			return this._normFields || [];
 		},
 		model() {
-			return this.value || {};
+			if (!this._normValue && (this.value)) {
+				let props = this.normFields
+					.flatMap(flatten)
+					.filter(field => field.key);
+
+				this._normValue = Object.defineProperties({}, props.reduce((wrapper, field) => {
+					// TODO: Replace _comp with _value
+					wrapper[field.key] = {
+						get() {
+							return this._comp.value?.[field.key] != null
+								? this._comp.value[field.key]
+								: field.default;
+						},
+						set(value) {
+							this._comp.value[field.key] = value;
+						}
+					};
+					return wrapper;
+				}, { _comp: { value: this } }));
+			}
+
+			return this._normValue || {};
 		},
 
 		collapse_id() {
@@ -261,6 +355,7 @@ export default {
 		toggle() {
 			this.expanded = !this.expanded;
 		},
+
 		markdown(string) {
 			let regexp = /^[\ \t]*(?:(?<hr>-{3,})|(?:(?:(?<h>#+)|(?<li>(?<ol>\d+\.)|(?<ul>\*|\+|-)))\s+)?(?<text>.+|\n))/gm;
 			let source = string.trim();
@@ -310,6 +405,50 @@ export default {
 				})
 				.join('');
 		},
+		normField(field) {
+			if (field == null) {
+				return {
+					html: '<p></p>'
+				};
+			} else if (typeof (field) == 'object') {
+				let keys = Object.keys(field);
+
+				Object.keys(this.normProps)
+					.forEach((key) => {
+						let normFunc = this.normProps[key];
+						if (normFunc.length > 1) {
+							field[key] = normFunc(field, field[key]);
+						} else if (!keys.includes(key)) {
+							field[key] = normFunc(field);
+						}
+					});
+				return field;
+			} else if (typeof (field) == 'string') {
+				return {
+					html: this.markdown(field)
+				};
+			}
+		},
+		fieldsMap(fields, norm) {
+			if (!Array.isArray(fields)) {
+				fields = Object.entries(fields)
+					.map(([key, val]) => val && typeof (val) == 'object' && !Array.isArray(val) ? { key, ...val } : val);
+			}
+
+			return fields
+				.map((item) => {
+					if (Array.isArray(item)) {
+						return {
+							fields: this.fieldsMap(item, norm)
+						};
+					} else if (typeof (norm) == 'function') {
+						return norm(item);
+					} else {
+						return item;
+					}
+				})
+				.filter((item) => item !== undefined);
+		}
 	}
 }
 </script>
