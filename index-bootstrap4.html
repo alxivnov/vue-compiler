@@ -99,7 +99,8 @@
 				page: query.page
 					? 'page-' + query.page
 					: 'page-code',
-			}
+			},
+			mixins: [VueCompiler.vue2.mixin]
 		};
 
 		VueCompiler.createApp(opts, comp, { cache: true, async: /\.vue$|(?:^|\/)vue\//g });

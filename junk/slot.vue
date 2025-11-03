@@ -1,4 +1,4 @@
-<template functional>
+<template>
 	<div>
 		SLOT:
 		<slot name="empty">

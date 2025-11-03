@@ -2,13 +2,13 @@
 	<div>
 		<div class="row">
 			<div class="col">
-				<AnyForm v-model="json" _size="lg" :fields="fields" @submit="submit">
-				</AnyForm>
+				<UniForm v-model="json" :hor="true" _size="lg" :fields="fields" @submit="submit">
+				</UniForm>
 			</div>
 			<div class="col">
-				<AnyForm v-model="json" col="2" size="sm" readonly="plaintext">
+				<UniForm v-model="json" hor="2" size="sm" readonly="plaintext">
 					Readonly:
-				</AnyForm>
+				</UniForm>
 				<div class="mt-3">
 					<code><pre>{{ JSON.stringify(json, undefined, 4) }}</pre></code>
 				</div>
@@ -18,7 +18,54 @@
 </template>
 
 <script>
-import AnyForm from '../any-form.vue';
+import UniForm from './uni-form.vue';
+
+let sub_fields = {
+	row: {			// row
+		col: [		// col
+			{
+				key: 'sub_number',
+				type: 'number',
+				$label: 'Number',
+
+				$hor: 'auto'
+			},
+			{
+				key: 'sub_string',
+				type: 'string',
+				$label: 'String',
+
+				// $hor: true
+			},
+			{
+				key: 'sub_boolean',
+				type: 'boolean',
+				$label: 'Boolean',
+
+				$hor: false
+			},
+		],
+		sub_null: {
+			// key: 'prop_null',
+			// type: 'number',
+			options: {
+				one: 1,
+				two: 2,
+			},
+			// default: 2,
+			$label: 'null',
+			$hor: 2
+		},
+		sub_undefined: {
+			// key: 'prop_undefined',
+			// type: Boolean,
+			// default: false,
+			$default: true,
+			$label: 'undefined',
+			$hor: 'auto'
+		}
+	}
+};
 
 let fields = [
 	/*md*/`
@@ -31,76 +78,57 @@ let fields = [
 1. one
 2. two
 
-_This_ text __should__ appear *formatted* according **to** the [spec](https://daringfireball.net/projects/markdown/syntax).
+_This_ text __should__ appear *formatted* according **to** the [spec](https://daringfireball.net/projects/markdown/syntax){target="_blank"}.
 `,
 	null,	// ?
-	true,	// ?
-	false,	// ?
 	0,		// ?
 	100,	// ?
+	(data) => {
+		alert(JSON.stringify(data, undefined, 4));
+	},
+	null,
 	{
 		key: 'prop_boolean',
-		type: 'boolean'
+		type: 'boolean',
+		$hor: false
 	},
 	{
 		key: 'prop_number',
-		select: [
+		options: [
 			123,
 			234,
 			345
-		]
+		],
+		$hor: false
 	},
 	{
 		key: 'prop_string',
 		type: 'string',
-		select: {
+		options: {
 			'abc 123': '123',
 			'bcd 234': '234',
 			'cde 345': '345'
-		}
+		},
+		$hor: false
 	},
 	{
 		key: 'prop_object',
 		type: 'object',
-		fields: [
-			[			// row
-				[		// col
-					{
-						key: 'prop_number',
-						type: 'number',
-						label: 'Number',
-						col: 2
-					},
-					{
-						key: 'prop_string',
-						type: 'string',
-						label: 'String',
-						col: true
-					},
-					{
-						key: 'prop_boolean',
-						type: 'boolean',
-						label: 'Boolean'
-					},
-				],
-				{
-					key: 'prop_null',
-					type: 'number',
-					label: 'null'
-				},
-				{
-					key: 'prop_undefined',
-					default: true,
-					label: 'undefined'
-				}
-			]
-		],
-	}
+		$label: false,							// TODO: Hide labels & collapse indicators if $label = false
+		$fields: sub_fields
+	},
+	{
+		key: 'prop_null',
+		type: 'object',
+		$label: true,
+		$fields: sub_fields
+	},
+	// [true, false]							// TODO: Add support for Done, Cancel buttons
 ];
 
 export default {
 	components: {
-		AnyForm
+		UniForm
 	},
 	data() {
 		return {
@@ -114,21 +142,21 @@ export default {
 				prop_boolean: true,
 				prop_number: 234,
 				prop_string: '345',
-				prop_object: {
-					prop_number: 124,
-					prop_string: '125',
-					prop_boolean: false,
-					prop_null: null,
-					prop_undefined: undefined,
+				prop_object: {				// TODO: Fix aditing null as v-model and property
+					sub_number: 124,
+					sub_string: '125',
+					sub_boolean: false,
+					sub_null: null,
+					sub_undefined: undefined,
 				},
 				prop_null: null,
 				prop_undefined: undefined,
 			};
-		}, 100);
+		}, 300);
 	},
 	methods: {
 		submit() {
-			alert(JSON.stringify(this.json, undefined, 4))
+			alert(JSON.stringify(this.json, undefined, 4));
 		},
 
 		interface(value) {

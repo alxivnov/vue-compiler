@@ -1,9 +1,9 @@
-<template functional>
+<template>
 	<div :class="{
 		'btn-group': true,
-		'btn-group-sm': props.size == 'sm',
-		'btn-group-lg': props.size == 'lg',
-		'btn-group-vertical': props.vertical,
+		'btn-group-sm': size == 'sm',
+		'btn-group-lg': size == 'lg',
+		'btn-group-vertical': vertical,
 	}">
 		<slot></slot>
 	</div>

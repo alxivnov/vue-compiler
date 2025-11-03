@@ -1,66 +1,66 @@
-<template functional>
-	<div :class="props.col !== undefined
-		? props.col
-			? 'col-' + props.col
+<template>
+	<div :class="col !== undefined
+		? col
+			? 'col-' + col
 			: 'col'
 		: null">
 		<div :class="[
 
 			'form-check',
-			props.formSwitch ? 'form-switch' : null,
-			props.inline ? 'form-check-inline' : null,
+			formSwitch ? 'form-switch' : null,
+			inline ? 'form-check-inline' : null,
 
 			'custom-control',
-			props.type == 'radio'
+			type == 'radio'
 				? 'custom-radio'
-				: props.formSwitch
+				: formSwitch
 					? 'custom-switch'
 					: 'custom-checkbox',
-			props.inline ? 'custom-control-inline' : null,
+			inline ? 'custom-control-inline' : null,
 /*
-			props.col !== undefined
-				? props.col
-					? 'col-' + props.col
+			col !== undefined
+				? col
+					? 'col-' + col
 					: 'col'
 				: null
 */
 		]">
 			<input
 				v-bind="{
-					...data.attrs,
+					...$attrs,
 
 //					Vue 3
-					...(data.attrs
-						? data.attrs.modelValue !== undefined
+					...($attrs
+						? vue3//$attrs.modelValue !== undefined
 							? {
-								checked: props.type == 'radio' ? (data.attrs.modelValue == (data.attrs.value || props.htmlValue)) : data.attrs.modelValue,
-								onChange: $event => $emit('update:modelValue', props.type == 'radio' ? (data.attrs.value || props.htmlValue) : $event.target.checked)
+								checked: type == 'radio' ? ($attrs.modelValue == ($attrs.value || htmlValue)) : $attrs.modelValue,
+								onChange: $event => $emit('update:modelValue', type == 'radio' ? ($attrs.value || htmlValue) : $event.target.checked)
 							}
 							: {
-								checked: props.type == 'radio' ? (data.model.value == props.htmlValue) : data.attrs.value
+								checked: type == 'radio' ? ($data.model.value == htmlValue) : $attrs.value
 							}
 						: {})
 				}"
 
 				v-on="{
-					...listeners,
-					...(data.model
-						? { input: $event => (Array.isArray(listeners.input) ? listeners.input : [ listeners.input ]).forEach(el => el(props.type == 'radio' ? props.htmlValue : $event.target.checked)) }
+					...$listeners,
+					...($data.model
+						? { input: $event => (Array.isArray($listeners.input) ? $listeners.input : [ $listeners.input ]).forEach(el => el(type == 'radio' ? htmlValue : $event.target.checked)) }
 						: {})
 				}"
-				:id="data.attrs && (data.attrs.id || data.attrs.name) || data.model && data.model.expression || 'check'"
-				:name="data.attrs && (data.attrs.name || data.attrs.id) || data.model && data.model.expression || 'check'"
+				:id="$attrs && ($attrs.id || $attrs.name) || $data.model && $data.model.expression || 'check'"
+				:name="$attrs && ($attrs.name || $attrs.id) || $data.model && $data.model.expression || 'check'"
 
 				:class="{
 					'form-check-input': true,
 					'custom-control-input': true,
-					'position-static': !slots().default
+					'position-static': !$slots.default
 				}"
 
-				:type="props.type || 'checkbox'"
+				:type="type || 'checkbox'"
 			>
 
-			<label :for="data.attrs && (data.attrs.id || data.attrs.name) || data.model && data.model.expression || 'check'" v-show="slots().default" class="form-check-label custom-control-label">
+			<label :for="$attrs && ($attrs.id || $attrs.name) || $data.model && $data.model.expression || 'check'" v-show="$slots.default" class="form-check-label custom-control-label">
 				<slot></slot>
 			</label>
 		</div>
@@ -81,7 +81,12 @@ export default {
 		'inline',	// FALSE|true
 
 		'form-switch'	// FALSE|true
-	]
+	],
+	computed: {
+		vue3() {
+			return Vue.version >= '3.0';
+		}
+	}
 
 	//	disabled
 }

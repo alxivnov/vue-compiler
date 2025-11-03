@@ -1,25 +1,25 @@
-<template functional>
+<template>
 	<a
-		v-bind="data.attrs"
-		v-on="listeners"
+		v-bind="Object.fromEntries(Object.entries($attrs).filter(([name]) => !(name.startsWith('on') && name.length > 2)))"
+		v-on="$listeners"
 
 		href="#"
 		:class="{
-			['dropdown-' + (slots().default || props.fas ? 'item' : 'divider')]: true,
-			'active': props.state == 'active' || data.attrs && data.attrs.active !== undefined && data.attrs.active !== false,
-			'disabled': props.state == 'disabled' || data.attrs && data.attrs.disabled !== undefined && data.attrs.disabled !== false,
+			['dropdown-' + ($slots.default || fas ? 'item' : 'divider')]: true,
+			'active': state == 'active' || $attrs && $attrs.active !== undefined && $attrs.active !== false,
+			'disabled': state == 'disabled' || $attrs && $attrs.disabled !== undefined && $attrs.disabled !== false,
 
-			['text-' + props.textStyle]: props.textStyle,
+			['text-' + textStyle]: textStyle,
 		}"
 	>
 		<span
-			:v-show="props.fas"
+			:v-show="fas"
 			:class="{
-				'fas': props.fas,
-				['fa-' + props.fas]: props.fas,
+				'fas': fas,
+				['fa-' + fas]: fas,
 				'fa-fw': true,
 
-				'mr-1 me-1': props.fas && slots().default,
+				'mr-1 me-1': fas && $slots.default,
 			}"
 		></span>
 		<slot></slot>

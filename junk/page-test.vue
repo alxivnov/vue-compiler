@@ -36,7 +36,8 @@ export default {
 					let key = url.split('/').slice(-1)[0].split('.')[0];
 					console.log(key);
 					if (!comp[key])
-						comp[key] = Vue.component(key, () => import(url));
+						comp[key] = Vue.defineAsyncComponent(() => import(url));
+						// comp[key] = Vue.component(key, () => import(url));
 
 					return comp;
 				}, { /*markRaw: true*/ });

@@ -1,66 +1,66 @@
-<template functional>
+<template>
 	<div :class="[
 //		'form-group',
 //		'mb-3',
-		props.row !== undefined
+		row !== undefined
 			? 'row'
-			: props.col !== undefined
-				? 'col' + (props.col ? '-' + props.col : '')
+			: col !== undefined
+				? 'col' + (col ? '-' + col : '')
 				: null
 	]">
 		<label :class="[
-			props.row !== undefined
-				? 'col-form-label' + (props.size ? '-' + props.size : '')
+			row !== undefined
+				? 'col-form-label' + (size ? '-' + size : '')
 				: 'form-label',
-			props.row !== undefined
-				? 'col-' + props.row
+			row !== undefined
+				? 'col-' + row
 				: null
-		]" :for="data.attrs && data.attrs.id || data.model && data.model.expression" v-show="slots().default">
+		]" :for="$attrs && $attrs.id || $data.model && $data.model.expression" v-show="$slots.default">
 			<slot></slot>
 
-			<span v-show="data.attrs && data.attrs.required !== undefined" class="text-danger fa fas-asterisk"></span>
+			<span v-show="$attrs && $attrs.required !== undefined" class="text-danger fa fas-asterisk"></span>
 		</label>
 
 		<textarea
 			v-bind="{
-				...data.attrs,
+				...$attrs,
 
 //				Vue 3
-				...(data.attrs && data.attrs.modelValue !== undefined
+				...(vue3//$attrs && $attrs.modelValue !== undefined
 					? {
-						value: data.attrs.modelValue,
+						value: $attrs.modelValue,
 						onInput: $event => $emit('update:modelValue', $event.target.value)
 					}
 					: {})
 			}"
 
 			v-on="{
-				...listeners,
-				...(data.model
-					? { input: $event => (Array.isArray(listeners.input) ? listeners.input : [ listeners.input ]).forEach(el => el($event.target.value)) }
+				...$listeners,
+				...($data.model
+					? { input: $event => (Array.isArray($listeners.input) ? $listeners.input : [ $listeners.input ]).forEach(el => el($event.target.value)) }
 					: {})
 			}"
-			:id="data.attrs && (data.attrs.id || data.attrs.name) || data.model && data.model.expression"
-			:name="data.attrs && (data.attrs.name || data.attrs.id) || data.model && data.model.expression"
+			:id="$attrs && ($attrs.id || $attrs.name) || $data.model && $data.model.expression"
+			:name="$attrs && ($attrs.name || $attrs.id) || $data.model && $data.model.expression"
 
 			:class="[
 				'form-control',
-				props.row !== undefined
+				row !== undefined
 					? 'col'
 					: null,
 
-				data.attrs && data.attrs['is-invalid']
+				$attrs && $attrs['is-invalid']
 					? 'is-invalid'
 					: null
 			]"
 		></textarea>
-		<small v-show="slots().text" class="form-text text-muted">
+		<small v-show="$slots.text" class="form-text text-muted">
 			<slot name="text"></slot>
 		</small>
-		<div v-show="slots().valid" :class="[ props.feedbackTooltips ? 'valid-tooltip' : 'valid-feedback' ]">
+		<div v-show="$slots.valid" :class="[ feedbackTooltips ? 'valid-tooltip' : 'valid-feedback' ]">
 			<slot name="valid"></slot>
 		</div>
-		<div v-show="slots().invalid" :class="[ props.feedbackTooltips ? 'invalid-tooltip' : 'invalid-feedback' ]">
+		<div v-show="$slots.invalid" :class="[ feedbackTooltips ? 'invalid-tooltip' : 'invalid-feedback' ]">
 			<slot name="invalid"></slot>
 		</div>
 	</div>
@@ -76,6 +76,11 @@ export default {
 
 		'feedback-tooltips'	// FALSE|true
 	],
+	computed: {
+		vue3() {
+			return Vue.version >= '3.0';
+		}
+	}
 	//	readonly
 }
 </script>

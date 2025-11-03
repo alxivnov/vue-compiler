@@ -1,12 +1,12 @@
-<template functional>
+<template>
 	<a
 		:class="{
 			'nav-item': true,
 			'nav-link': true,
-			'active': props.state == 'active' || data.attrs && data.attrs.active !== undefined && data.attrs.active !== false,
-			'disabled': props.state == 'disabled' || data.attrs && data.attrs.disabled !== undefined && data.attrs.disabled !== false,
+			'active': state == 'active' || $attrs && $attrs.active !== undefined && $attrs.active !== false,
+			'disabled': state == 'disabled' || $attrs && $attrs.disabled !== undefined && $attrs.disabled !== false,
 		}"
-		:href="props.href || '#'"
+		:href="href || '#'"
 	>
 		<slot></slot>
 	</a>

@@ -1,19 +1,19 @@
-<template functional>
+<template>
 	<nav :class="{
 		'navbar': true,
-		['navbar-expand' + (typeof(props.expand) == 'string' && props.expand.length ? '-' + props.expand : '')]: props.expand !== undefined,
+		['navbar-expand' + (typeof(expand) == 'string' && expand.length ? '-' + expand : '')]: expand !== undefined,
 
-		['navbar-' + (props.theme || 'light')]: true,
-		['bg-' + (props.color || props.theme || 'light')]: props.color || props.theme || 'light',
+		['navbar-' + (theme || 'light')]: true,
+		['bg-' + (color || theme || 'light')]: color || theme || 'light',
 
-		[props.stick ? 'fixed-' + props.stick : 'sticky-top']: props.stick !== undefined,
+		[stick ? 'fixed-' + stick : 'sticky-top']: stick !== undefined,
 	}">
 		<div class="container-fluid">
 
 		<a
 			class="navbar-brand"
 			href="/"
-			v-if="slots().brand"
+			v-if="$slots.brand"
 		>
 			<slot name="brand"></slot>
 		</a>
@@ -22,17 +22,17 @@
 			class="navbar-toggler"
 			type="button"
 			data-toggle="collapse"
-			:data-target="'#' + (data.attrs && data.attrs.id || 'navbar') + '-collapse'"
-			:aria-controls="(data.attrs && data.attrs.id || 'navbar') + '-collapse'"
+			:data-target="'#' + ($attrs && $attrs.id || 'navbar') + '-collapse'"
+			:aria-controls="($attrs && $attrs.id || 'navbar') + '-collapse'"
 			aria-expanded="false"
 			aria-label="Toggle navigation"
 
 			data-bs-toggle="collapse"
-			:data-bs-target="'#' + (data.attrs && data.attrs.id || 'navbar') + '-collapse'"
+			:data-bs-target="'#' + ($attrs && $attrs.id || 'navbar') + '-collapse'"
 		>
 			<span class="navbar-toggler-icon"></span>
 		</button>
-		<div class="collapse navbar-collapse" :id="(data.attrs && data.attrs.id || 'navbar') + '-collapse'">
+		<div class="collapse navbar-collapse" :id="($attrs && $attrs.id || 'navbar') + '-collapse'">
 			<div class="navbar-nav mr-auto me-auto">
 				<slot></slot>
 			</div>

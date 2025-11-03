@@ -4,19 +4,19 @@
 </tab-content>
 -->
 
-<template functional>
+<template>
 	<div
 		:class="[
 			'list-group',
-			props.flush !== undefined && props.flush !== false && 'list-group-flush',
-			props.horizontal !== undefined && props.horizontal !== false && ('list-group-horizontal' + (
-				['sm', 'md', 'lg', 'xl'].includes(props.horizontal) ? ('-' + props.horizontal) : ''
+			flush !== undefined && flush !== false && 'list-group-flush',
+			horizontal !== undefined && horizontal !== false && ('list-group-horizontal' + (
+				['sm', 'md', 'lg', 'xl'].includes(horizontal) ? ('-' + horizontal) : ''
 			))
 		]"
-		v-bind="data.attrs"
-		v-on="listeners"
+		v-bind="Object.fromEntries(Object.entries($attrs).filter(([name]) => !(name.startsWith('on') && name.length > 2)))"
+		v-on="$listeners"
 	>
-		<slot v-for="(item, i) in props.items" :item="item">
+		<slot v-for="(item, i) in items" :item="item">
 			<a :key="i" class="list-group-item">
 				{{ item }}
 			</a>

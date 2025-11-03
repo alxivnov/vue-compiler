@@ -115,7 +115,9 @@
 			{{ modExp.text }}
 		</tr>
 		<tr>
-			<some />
+			<td>
+				<div v-html="some"></div>
+			</td>
 		</tr>
 		<tr v-for="(obj, i) in truthy" :key="i">
 			<td v-for="(val, j) in Object.values(obj)" :key="j">

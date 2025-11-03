@@ -5,11 +5,11 @@ import exp_def from 'export-default.js';
 import { prop } from 'module-exports.js';
 
 import FormInput from '../form-input.vue';
-const FormSelect = () => import('../form-select.vue');
-const FormRadioGroup = () => import('../form-radio-group.vue');
+const FormSelect = Vue.defineAsyncComponent(() => import('../form-select.vue'));
+const FormRadioGroup = Vue.defineAsyncComponent(() => import('../form-radio-group.vue'));
 
 import ImportFrom from 'import-from.vue';
-const ImportFunc = () => import('import-func.vue');
+const ImportFunc = Vue.defineAsyncComponent(() => import('import-func.vue'));
 console.log('ImportFrom', ImportFrom);
 console.log('ImportFunc', ImportFunc);
 
@@ -24,7 +24,7 @@ const test = Vue.version < '3.0' && Vue.component
 
 import some from 'html.html';
 
-const Modal = () => import('../modal.vue');
+const Modal = Vue.defineAsyncComponent(() => import('../modal.vue'));
 
 //console.log(func);
 
@@ -39,23 +39,25 @@ export default {
 		'form-input': FormInput,
 		'form-select': FormSelect,
 		'form-radio-group': FormRadioGroup,
-		'some': some,
+		// 'some': some,
 
 		'import-from': ImportFrom,
 		'import-func': ImportFunc,
 		'test': test,
 
-		ScoreBadge: () => import('./score-badge.vue'),
-		'composition-api': () => import('./composition-api.vue'),
+		ScoreBadge: Vue.defineAsyncComponent(() => import('./score-badge.vue')),
+		'composition-api': Vue.defineAsyncComponent(() => import('./composition-api.vue')),
 
-		ExtendsJs: () => import('./extends-comp.js'),
-		ExtendsVue: () => import('./extends-comp.vue'),
+		ExtendsJs: Vue.defineAsyncComponent(() => import('./extends-comp.js')),
+		ExtendsVue: Vue.defineAsyncComponent(() => import('./extends-comp.vue')),
 	},
 	props: [
 		'prop'
 	],
 	data() {
 		return {
+			some,
+
 			vInput: 'Some',
 			vSelect: '5th',
 			vCheck: true,

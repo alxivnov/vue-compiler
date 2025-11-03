@@ -1,4 +1,4 @@
-<template functional>
+<template>
 	<span class="dropdown-item-text">
 		<slot></slot>
 	</span>

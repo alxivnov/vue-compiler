@@ -1,78 +1,78 @@
-<template functional>
+<template>
 	<div
 		:class="[
-			props.row !== undefined
+			row !== undefined
 				? 'row'
-				: props.col !== undefined
-					? 'col' + (props.col ? '-' + props.col : '')
+				: col !== undefined
+					? 'col' + (col ? '-' + col : '')
 					: null,
 
-			/**/props.btnStyle == 'link'
+			/**/btnStyle == 'link'
 				? null
 				: /**/'btn-group',
-			props.dropdownDirection == 'up'
+			dropdownDirection == 'up'
 				? 'dropup'
-				: props.dropdownDirection == 'right'
+				: dropdownDirection == 'right'
 					? 'dropright'
-					: props.dropdownDirection == 'left'
+					: dropdownDirection == 'left'
 						? 'dropleft'
-						: slots().dropdown
+						: $slots.dropdown
 							? 'dropdown'
 							: null
 		]"
 	>
 
 		<a
-			:href="data.attrs && data.attrs.href ? data.attrs.href : '#'"
+			:href="$attrs && $attrs.href ? $attrs.href : '#'"
 			role="button"
 
-			v-bind="data.attrs"
-			v-on="listeners"
+			v-bind="Object.fromEntries(Object.entries($attrs).filter(([name]) => !(name.startsWith('on') && name.length > 2)))"
+			v-on="$listeners"
 
-			:type="props.btnType == 'submit' ? 'submit' : null/*'button'*/"
+			:type="btnType == 'submit' ? 'submit' : null/*'button'*/"
 			:class="{
-				'btn': /**/props.btnStyle == 'link' ? false : /**/true,
+				'btn': /**/btnStyle == 'link' ? false : /**/true,
 				['btn-'
-					+ (props.outline !== undefined && props.outline !== false ? 'outline-' : '')
-					+ (props.btnStyle ? props.btnStyle : 'primary')]: true,
-				'btn-sm': props.size == 'sm',
-				'btn-lg': props.size == 'lg',
-				'btn-block': props.block !== undefined && props.block !== false,
+					+ (outline !== undefined && outline !== false ? 'outline-' : '')
+					+ (btnStyle ? btnStyle : 'primary')]: true,
+				'btn-sm': size == 'sm',
+				'btn-lg': size == 'lg',
+				'btn-block': block !== undefined && block !== false,
 
-				'active': props.state == 'active' || data.attrs && data.attrs.active !== undefined && data.attrs.active !== false,
-				'disabled': props.state == 'disabled' || data.attrs && data.attrs.disabled !== undefined && data.attrs.disabled !== false,
+				'active': state == 'active' || $attrs && $attrs.active !== undefined && $attrs.active !== false,
+				'disabled': state == 'disabled' || $attrs && $attrs.disabled !== undefined && $attrs.disabled !== false,
 
-				'dropdown-toggle': slots().dropdown/**/ && props.btnStyle != 'link'/**/,
-				'dropdown-toggle-split': slots().dropdown && !props.fas && !slots().default
+				'dropdown-toggle': $slots.dropdown/**/ && btnStyle != 'link'/**/,
+				'dropdown-toggle-split': $slots.dropdown && !fas && !$slots.default
 			}"
 
-			:data-toggle="slots().dropdown ? 'dropdown' : props.popoverTitle || props.popoverContent ? 'popover' : null"
+			:data-toggle="$slots.dropdown ? 'dropdown' : popoverTitle || popoverContent ? 'popover' : null"
 			aria-haspopup="true"
 			aria-expanded="false"
 
-			:title="props.popoverTitle"
-			:data-content="props.popoverContent"
-			:data-placement="props.popoverPlacement"
+			:title="popoverTitle"
+			:data-content="popoverContent"
+			:data-placement="popoverPlacement"
 
-			:data-bs-toggle="slots().dropdown ? 'dropdown' : props.popoverTitle || props.popoverContent ? 'popover' : null"
-			:data-bs-content="props.popoverContent"
-			:data-bs-placement="props.popoverPlacement"
+			:data-bs-toggle="$slots.dropdown ? 'dropdown' : popoverTitle || popoverContent ? 'popover' : null"
+			:data-bs-content="popoverContent"
+			:data-bs-placement="popoverPlacement"
 		>
 			<i
-				v-if="props.bi"
+				v-if="bi"
 				:class="{
 					'bi': true,
-					['bi-' + props.bi]: true
+					['bi-' + bi]: true
 				}"
 			></i>
 			<span
-				v-else-if="props.fas"
+				v-else-if="fas"
 				:class="{
-					'fas': props.fas,
-					['fa-' + props.fas]: props.fas,
+					'fas': fas,
+					['fa-' + fas]: fas,
 					'fa-fw': true,
 
-					'mr-1 me-1': props.fas && slots().default,
+					'mr-1 me-1': fas && $slots.default,
 				}"
 			></span>
 			<slot>
@@ -81,12 +81,12 @@
 		</a>
 
 		<div
-			v-if="slots().dropdown"
+			v-if="$slots.dropdown"
 			:class="{
 				'dropdown-menu': true,
 				['dropdown-menu-'
-					+ (props.dropdownAlignmentSize ? props.dropdownAlignmentSize + '-' : '')
-					+ (props.dropdownAlignment ? props.dropdownAlignment : 'left')]: true,
+					+ (dropdownAlignmentSize ? dropdownAlignmentSize + '-' : '')
+					+ (dropdownAlignment ? dropdownAlignment : 'left')]: true,
 			}"
 		>
 			<slot name="dropdown"></slot>

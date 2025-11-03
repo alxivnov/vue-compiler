@@ -1,15 +1,15 @@
-<template functional>
+<template>
 	<span :class="[
-		props.faStyle == 'regular'
+		faStyle == 'regular'
 			? 'far'
-			: props.faStyle == 'light'
+			: faStyle == 'light'
 				? 'fal'
-				: props.faStyle == 'duotone'
+				: faStyle == 'duotone'
 					? 'fad'
-					: props.faStyle == 'brand'
+					: faStyle == 'brand'
 						? 'fab'
 						: 'fas',
-		'fa-' + props.icon,
+		'fa-' + icon,
 	]"></span>
 </template>
 

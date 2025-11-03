@@ -1,48 +1,48 @@
-<template functional>
+<template>
 	<div
 		:class="[
-			bs5 && (props.collapse || props.accordion !== undefined) ? 'accordion-item' : 'card',
-			props.height !== undefined && props.height !== false && 'h-' + props.height,
-			props.align !== undefined && props.align !== false && 'text-' + props.align,
-			props.textColor !== undefined && props.textColor !== false && 'text-' + props.textColor,
-			props.bgColor !== undefined && props.bgColor !== false && 'bg-' + props.bgColor,
-			props.borderColor !== undefined && props.borderColor !== false && 'border-' + props.borderColor
+			bs5 && (collapse || accordion !== undefined) ? 'accordion-item' : 'card',
+			height !== undefined && height !== false && 'h-' + height,
+			align !== undefined && align !== false && 'text-' + align,
+			textColor !== undefined && textColor !== false && 'text-' + textColor,
+			bgColor !== undefined && bgColor !== false && 'bg-' + bgColor,
+			borderColor !== undefined && borderColor !== false && 'border-' + borderColor
 		]"
 	>
 		<div
-			v-show="slots().header"
+			v-show="$slots.header"
 			:class="[
-				bs5 && (props.collapse || props.accordion !== undefined) ? 'accordion-header' : 'card-header',
-				props.headerTextColor !== undefined && props.headerTextColor !== false && 'text-' + props.headerTextColor,
-				props.headerBgColor !== undefined && props.headerBgColor !== false && 'bg-' + props.headerBgColor,
-				props.headerBorderColor !== undefined && props.headerBorderColor !== false && 'border-' + props.headerBorderColor
+				bs5 && (collapse || accordion !== undefined) ? 'accordion-header' : 'card-header',
+				headerTextColor !== undefined && headerTextColor !== false && 'text-' + headerTextColor,
+				headerBgColor !== undefined && headerBgColor !== false && 'bg-' + headerBgColor,
+				headerBorderColor !== undefined && headerBorderColor !== false && 'border-' + headerBorderColor
 			]"
 
-			:id="props.collapse && props.collapse + '-heading' + (props.accordion != null ? '-' + props.accordion : '')"
+			:id="collapse && collapse + '-heading' + (accordion != null ? '-' + accordion : '')"
 		>
 			<div
 				:class="[
-					bs5 && (props.collapse || props.accordion !== undefined) && 'accordion-button',
+					bs5 && (collapse || accordion !== undefined) && 'accordion-button',
 
-					props.nav !== undefined && props.nav !== false && 'nav',
-					props.nav == 'tabs' && 'nav-tabs card-header-tabs',
-					props.nav == 'pills' && 'nav-pills card-header-pills',
+					nav !== undefined && nav !== false && 'nav',
+					nav == 'tabs' && 'nav-tabs card-header-tabs',
+					nav == 'pills' && 'nav-pills card-header-pills',
 
-					/*props.collapse && props.accordion !== undefined && props.accordion*/!props.show && 'collapsed'
+					/*collapse && accordion !== undefined && accordion*/!show && 'collapsed'
 				]"
 
 				X-class="btn btn-link btn-block text-left"
 				X-type="button"
 
-				:data-bs-toggle="props.collapse && 'collapse'"
-				:data-bs-target="props.collapse && '#' + props.collapse + '-collapse' + (props.accordion != null ? '-' + props.accordion : '')"
+				:data-bs-toggle="collapse && 'collapse'"
+				:data-bs-target="collapse && '#' + collapse + '-collapse' + (accordion != null ? '-' + accordion : '')"
 
-				:data-toggle="props.collapse && 'collapse'"
-				:data-target="props.collapse && '#' + props.collapse + '-collapse' + (props.accordion != null ? '-' + props.accordion : '')"
-				:aria-expanded="/*props.collapse && props.accordion !== undefined && !props.accordion*/props.show"
-				:aria-controls="props.collapse && props.collapse + '-collapse' + (props.accordion != null ? '-' + props.accordion : '')"
+				:data-toggle="collapse && 'collapse'"
+				:data-target="collapse && '#' + collapse + '-collapse' + (accordion != null ? '-' + accordion : '')"
+				:aria-expanded="/*collapse && accordion !== undefined && !accordion*/show"
+				:aria-controls="collapse && collapse + '-collapse' + (accordion != null ? '-' + accordion : '')"
 
-				:role="props.nav !== undefined && props.nav !== false ? 'tablist' : props.collapse ? 'button' : null"
+				:role="nav !== undefined && nav !== false ? 'tablist' : collapse ? 'button' : null"
 			>
 				<slot name="header"></slot>
 			</div>
@@ -50,36 +50,36 @@
 
 		<slot></slot>
 		<div
-			v-show="slots().content"
+			v-show="$slots.content"
 
 			:class="[
-				bs5 && (props.collapse || props.accordion !== undefined) && 'accordion-collapse',
+				bs5 && (collapse || accordion !== undefined) && 'accordion-collapse',
 
-				props.noGutters !== undefined && props.noGutters !== false && 'row no-gutters g-0',
+				noGutters !== undefined && noGutters !== false && 'row no-gutters g-0',
 
-				props.collapse && 'collapse',
-				/*props.collapse && props.accordion !== undefined && !props.accordion*/props.show && 'show',
+				collapse && 'collapse',
+				/*collapse && accordion !== undefined && !accordion*/show && 'show',
 
-				props.nav !== undefined && props.nav !== false && 'tab-content'
+				nav !== undefined && nav !== false && 'tab-content'
 			]"
 
-			:id="props.collapse && props.collapse + '-collapse' + (props.accordion != null ? '-' + props.accordion : '')"
-			:aria-labelledby="props.collapse && props.collapse + '-heading' + (props.accordion != null ? '-' + props.accordion : '')"
-			:data-parent="props.collapse && props.accordion != null && '#' + props.collapse || null"
+			:id="collapse && collapse + '-collapse' + (accordion != null ? '-' + accordion : '')"
+			:aria-labelledby="collapse && collapse + '-heading' + (accordion != null ? '-' + accordion : '')"
+			:data-parent="collapse && accordion != null && '#' + collapse || null"
 
-			:data-bs-parent="props.collapse && props.accordion != null && '#' + props.collapse || null"
+			:data-bs-parent="collapse && accordion != null && '#' + collapse || null"
 		>
-			<div v-if="bs5 && (props.collapse || props.accordion !== undefined)" class="accordion-body">
+			<div v-if="bs5 && (collapse || accordion !== undefined)" class="accordion-body">
 				<slot name="content"></slot>
 			</div>
 			<slot v-else name="content"></slot>
 		</div>
 
-		<div v-show="slots().footer" :class="[
+		<div v-show="$slots.footer" :class="[
 			'card-footer',
-			props.footerTextColor !== undefined && props.footerTextColor !== false && 'text-' + props.footerTextColor,
-			props.footerBgColor !== undefined && props.footerBgColor !== false && 'bg-' + props.footerBgColor,
-			props.footerBorderColor !== undefined && props.footerBorderColor !== false && 'border-' + props.footerBorderColor
+			footerTextColor !== undefined && footerTextColor !== false && 'text-' + footerTextColor,
+			footerBgColor !== undefined && footerBgColor !== false && 'bg-' + footerBgColor,
+			footerBorderColor !== undefined && footerBorderColor !== false && 'border-' + footerBorderColor
 		]">
 			<slot name="footer"></slot>
 		</div>

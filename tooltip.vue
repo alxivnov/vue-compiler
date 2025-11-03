@@ -1,13 +1,13 @@
-<template functional>
+<template>
 	<span
 		data-toggle="tooltip"
-		:title="props.title"
-		:data-placement="props.placement"
-		:data-html="props.html !== undefined && props.html !== false"
+		:title="title"
+		:data-placement="placement"
+		:data-html="html !== undefined && html !== false"
 
 		data-bs-toggle="tooltip"
-		:data-bs-placement="props.placement"
-		:data-bs-html="props.html !== undefined && props.html !== false"
+		:data-bs-placement="placement"
+		:data-bs-html="html !== undefined && html !== false"
 	>
 		<slot></slot>
 	</span>

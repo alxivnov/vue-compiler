@@ -14,7 +14,7 @@
 			v-bind="$attrs"
 		>
 <!--
-			:show="$('#' + (data.attrs.id || 'modal')).modal(props.show ? 'show' : 'hide')"
+			:show="$('#' + ($attrs.id || 'modal')).modal(show ? 'show' : 'hide')"
 -->
 			<div
 				:class="{
